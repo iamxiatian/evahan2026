@@ -41,9 +41,9 @@ def main(input_folder:str, output_folder:str) -> None:
                 skipped += 1
 
     print("Processing complete!")
-    print("Successfully rotated and saved: {processed} images")
-    print("Processing failed: {skipped} images")
-    print("Output folder: {os.path.abspath(output_folder)}")
+    print(f"Successfully rotated and saved: {processed} images")
+    print(f"Processing failed: {skipped} images")
+    print(f"Output folder: {os.path.abspath(output_folder)}")
 
 if __name__ == "__main__":
     typer.run(main)
