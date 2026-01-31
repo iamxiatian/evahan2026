@@ -21,7 +21,7 @@ def main():
             messages=[
                 {
                     "role": "user",
-                    "content": f"<image>{config.OCR_QUERY}",
+                    "content": f"<image>{config.OCR_USER_QUERY}",
                 }
             ],
             images=[

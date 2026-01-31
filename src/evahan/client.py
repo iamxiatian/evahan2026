@@ -4,7 +4,7 @@
 需要提前运行：./scripts/deploy.sh
 
 """
-
+from pathlib import Path
 from openai import OpenAI
 from evahan import config
 
@@ -42,7 +42,18 @@ def query(image_url: str, query: str) -> str:
     response = resp.choices[0].message.content
     return response
 
-if __name__ == "__main__":
-    image_url = test_image = "/data/app/workspace/evahan2026/dataset/train_data/Dataset_A/a_0001.jpg"
-    response = query(image_url, config.OCR_QUERY)
+
+def test_ocr():
+    image_url = "/data/app/workspace/evahan2026/dataset/train_data/Dataset_A/a_0001.jpg"
+    response = query(image_url, config.OCR_USER_QUERY)
     print(response)
+
+def test_layout():
+    image_url:str = Path(config.EVAHAN_TRAIN_PATH_B, "b_0001.jpg").as_posix()
+    
+    layout_query = config.LAYOUT_USER_QUERY
+    response = query(image_url, layout_query)
+    print(response)
+
+if __name__ == "__main__":
+    test_layout()
