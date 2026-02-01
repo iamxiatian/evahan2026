@@ -36,18 +36,18 @@ LAYOUT_USER_QUERY = """识别并标记古籍图像中的版面元素。
 4. text - 文字区域
 
 ## 要求
-- 使用HTML标签格式输出，每个元素必须有data-bbox属性，里面的坐标格式为“左上角x1 左上角y1 右下角x2 右下角y2”
+- 使用HTML标签格式输出，每个元素必须有data-bbox属性，其值为从左上、右上、右下、左下四个点构成的坐标列表”
 - 检测图像中的所有目标区域
 - 按发现顺序输出，允许区域重叠
-- 每个区域返回label、points（左上角和右下角的坐标）和content（文字内容）
-- 文字区域的内容对应以自然阅读顺序返回的文本内容，并滤掉空格换行等空白符号，其他区域为空。
+- 不检测book_edge元素中包含的其他元素
+- 文字区域的内容对应以自然阅读顺序返回的文本内容，并滤掉空格换行等空白符号；非文字区域的内容为空。
 
 ## 示例输出：
-<div class="book_edge" data-bbox="x1, y1, x2, y2"></div>
-<div class="text" data-bbox="x1, y1, x2, y2">文本区域的文字内容</div>
-<div class="seal" data-bbox="x1, y1, x2, y2"></div>
-<div class="text" data-bbox="x1, y1, x2, y2">文本区域的文字内容</div>
-<div class="image" data-bbox="x1, y1, x2, y2"></div>"""
+<div class="book_edge" data-bbox="[[x1, y1], [x2, y2], [x3, y3],[x4, y4]]"></div>
+<div class="text" data-bbox="[[x1, y1], [x2, y2], [x3, y3],[x4, y4]]">文本区域的文字内容</div>
+<div class="seal" data-bbox="[[x1, y1], [x2, y2], [x3, y3],[x4, y4]]"></div>
+<div class="text" data-bbox="[[x1, y1], [x2, y2], [x3, y3],[x4, y4]]">文本区域的文字内容</div>
+<div class="image" data-bbox="[[x1, y1], [x2, y2], [x3, y3],[x4, y4]]"></div>"""
 
 
 # LAYOUT_SYSTEM_PROMPT = """"你是古籍版面分析专家，专门检测扫描古籍中的四类元素：
