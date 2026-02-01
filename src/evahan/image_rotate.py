@@ -3,8 +3,17 @@ import os
 import typer
 from PIL import Image
 
+
 # Supported image file extensions (can be added/modified manually)
-supported_extensions = ('.jpg', '.jpeg', '.png', '.bmp', '.gif', '.tiff', '.webp')
+supported_extensions = (
+    ".jpg",
+    ".jpeg",
+    ".png",
+    ".bmp",
+    ".gif",
+    ".tiff",
+    ".webp",
+)
 
 
 def rotate_image(input_path, output_path):
@@ -13,10 +22,13 @@ def rotate_image(input_path, output_path):
         # Rotate clockwise 90 degrees
         rotated = img.rotate(-90, expand=True)
         # Save (Keep original formatting)
-        rotated.save(output_path, quality=95)  # quality applies only to JPEG files
+        rotated.save(
+            output_path, quality=95
+        )  # quality applies only to JPEG files
         print(f"Rotated and saved: {os.path.basename(output_path)}")
 
-def main(input_folder:str, output_folder:str) -> None:
+
+def main(input_folder: str, output_folder: str) -> None:
     """
     将文件夹下的图片旋转90度
     Args:
@@ -44,6 +56,7 @@ def main(input_folder:str, output_folder:str) -> None:
     print(f"Successfully rotated and saved: {processed} images")
     print(f"Processing failed: {skipped} images")
     print(f"Output folder: {os.path.abspath(output_folder)}")
+
 
 if __name__ == "__main__":
     typer.run(main)

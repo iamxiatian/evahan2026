@@ -17,6 +17,11 @@ dependencies = [
     "vllm==0.11.0",
     "typer>=0.21.1",
     "openai>=2.16.0",
+    "gptqmodel>=4.2.5",
+    "optimum>=2.1.0",
+    "flash-attn==2.8.3",
+    "ipykernel>=7.1.0",
+    "structlog>=25.5.0",
 ]
 
 [project.scripts]
@@ -31,6 +36,9 @@ build-backend = "hatchling.build"
 [[tool.uv.index]]
 name= "aliyun"
 url = "https://mirrors.aliyun.com/pypi/simple/"
+
+[tool.uv.extra-build-dependencies]
+flash-attn = ["torch"]
 
 #[tool.uv.sources]
 #jdt-commons = { path = "assets/whl/jdt_commons-0.2.2-py3-none-any.whl" }
@@ -53,7 +61,7 @@ target-version = "py311"
 
 [tool.ruff.lint]
 select = ["E", "W", "F", "I", "B", "C4", "C9", "UP", "S", "RUF"]
-ignore = ["E501", "S101", "RUF003", "RUF001"]
+ignore = ["E501", "S101", "RUF003", "RUF001", "RUF002"]
 fixable = ["ALL"]
 
 # 允许以下划线为前缀的未使用变量。
@@ -64,6 +72,9 @@ dummy-variable-rgx = "^(_+|(_+[a-zA-Z0-9_]*[a-zA-Z0-9]+?))$"
 # 需要同时在[tool.ruff]的select中启用C901，或者直接设置为ALL。
 max-complexity = 8
 
+
+[tool.ruff.lint.isort]
+lines-after-imports = 2
 
 [tool.ruff.format]
 
@@ -78,3 +89,4 @@ skip-magic-trailing-comma = false
 
 # 像 Black 一样，自动检测合适的行尾。
 line-ending = "auto"
+

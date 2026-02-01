@@ -4,9 +4,13 @@
 需要提前运行：./scripts/deploy.sh
 
 """
+
 from pathlib import Path
+
 from openai import OpenAI
+
 from evahan import config
+
 
 client = OpenAI(
     api_key="EMPTY",
@@ -26,7 +30,8 @@ print(f"model_type: {model_type}")
 # image_url = convert_to_base64(images=['rose.jpg'])['images'][0]
 # image_url = f'data:image/jpeg;base64,{image_url}'
 
-def query(image_url: str, query: str) -> str:
+
+def query(image_url: str, query: str, system: str | None = None) -> str:
     messages = [
         {
             "role": "user",
@@ -36,6 +41,14 @@ def query(image_url: str, query: str) -> str:
             ],
         }
     ]
+
+    # 插入system消息
+    if system is not None:
+        messages.insert(
+            0,
+            {"role": "system", "content": system},
+        )
+
     resp = client.chat.completions.create(
         model=model_type, messages=messages, seed=42
     )
@@ -44,16 +57,17 @@ def query(image_url: str, query: str) -> str:
 
 
 def test_ocr():
-    image_url = "/data/app/workspace/evahan2026/dataset/train_data/Dataset_A/a_0001.jpg"
-    response = query(image_url, config.OCR_USER_QUERY)
+    image_path = config.EVAHAN_TRAIN_PATH_A / "a_0001.jpg"
+    response = query(image_path.as_posix(), config.OCR_USER_QUERY)
     print(response)
 
+
 def test_layout():
-    image_url:str = Path(config.EVAHAN_TRAIN_PATH_B, "b_0001.jpg").as_posix()
-    
-    layout_query = config.LAYOUT_USER_QUERY
-    response = query(image_url, layout_query)
+    image_path: Path = config.EVAHAN_TRAIN_PATH_B / "b_0001.jpg"
+
+    response = query(image_path.as_posix(), config.LAYOUT_USER_QUERY)
     print(response)
+
 
 if __name__ == "__main__":
     test_layout()

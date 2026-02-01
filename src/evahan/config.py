@@ -1,17 +1,25 @@
 import os
+from pathlib import Path
+
 from dotenv import load_dotenv
 from rich import print
 
+
 load_dotenv()
 
+QWEN_VL_7B_INSTRUCT = os.getenv("qwen_vl_7b_instruct")
+
 # 训练数据集的存放路径，该路径下存放了具体的三个数据集
-EVAHAN_DATA_PATH = os.getenv("evahan_dataset_parent_path", default="./dataset")
+EVAHAN_DATA_PATH: Path = Path(
+    os.getenv("evahan_dataset_parent_path", default="./dataset")
+)
 
-EVAHAN_TRAIN_PATH_A = os.path.join(EVAHAN_DATA_PATH, "train_data/Dataset_A")
-EVAHAN_TRAIN_PATH_B = os.path.join(EVAHAN_DATA_PATH, "train_data/Dataset_B")
-EVAHAN_TRAIN_PATH_C = os.path.join(EVAHAN_DATA_PATH, "train_data/Dataset_C")
+# 三个数据集的路径
+EVAHAN_TRAIN_PATH_A: Path = EVAHAN_DATA_PATH / "train_data/Dataset_A"
+EVAHAN_TRAIN_PATH_B: Path = EVAHAN_DATA_PATH / "train_data/Dataset_B"
+EVAHAN_TRAIN_PATH_C: Path = EVAHAN_DATA_PATH / "train_data/Dataset_C"
 
-if os.path.exists(EVAHAN_DATA_PATH):
+if EVAHAN_DATA_PATH.exists():
     print(f"[green]EVAHAN_DATA_PATH: {EVAHAN_DATA_PATH}[/green]")
 else:
     print(f"[red]EVAHAN_DATA_PATH: {EVAHAN_DATA_PATH} not exists![/red]")
@@ -19,22 +27,55 @@ else:
 # OCR的默认提取提示语
 OCR_USER_QUERY = "提取图中的文字，以自然阅读顺序输出。"
 
-LAYOUT_USER_QUERY = """请对这张古籍扫描图像进行版面分析，找出所有属于以下类别的区域：book_edge（书边）、image（插图）、seal（印章）、text（文字）。注意，只需输出每个区域的类别和矩形框坐标，矩形框用左上角和右下角的坐标表示，格式为：“<类别>: [x1, y1, x2, y2]”。每个区域输出一行。"""
+LAYOUT_USER_QUERY = """识别并标记古籍图像中的版面元素。
 
-# LAYOUT_SYSTEM_PROMPT = """"你是一个专业的古籍版面分析专家，专门识别扫描古籍中的版面元素。你的任务是：
-# 1. 识别并标注以下四类元素：book_edge(书边/边缘)、image(图像/插图)、seal(印章)、text(文字区域)
-# 2. 只关注元素的位置和类别，不识别文字内容
-# 3. 每个元素用矩形框标注
-# 4. 允许区域重叠
-# 5. 对整个图像中所有符合条件的元素进行完整标注"""
+## 需要识别的元素类型
+1. book_edge - 书籍边缘/书边
+2. image - 插图、图表、绘画
+3. seal - 印章区域（不识别印章文字）
+4. text - 文字区域
 
-# LAYOUT_USER_PROMPT = """请对这张古籍扫描图像进行版面分析，识别出所有的book_edge、image、seal和text区域。注意：
-#     1. 只标注位置，不识别文字内容
-#     2. 按发现顺序输出，允许区域重叠
-#     3. 每个区域返回格式：
+## 要求
+- 使用HTML标签格式输出，每个元素必须有data-bbox属性，里面的坐标格式为“左上角x1 左上角y1 右下角x2 右下角y2”
+- 检测图像中的所有目标区域
+- 按发现顺序输出，允许区域重叠
+- 每个区域返回label、points（左上角和右下角的坐标）和content（文字内容）
+- 文字区域的内容对应以自然阅读顺序返回的文本内容，并滤掉空格换行等空白符号，其他区域为空。
+
+## 示例输出：
+<div class="book_edge" data-bbox="x1, y1, x2, y2"></div>
+<div class="text" data-bbox="x1, y1, x2, y2">文本区域的文字内容</div>
+<div class="seal" data-bbox="x1, y1, x2, y2"></div>
+<div class="text" data-bbox="x1, y1, x2, y2">文本区域的文字内容</div>
+<div class="image" data-bbox="x1, y1, x2, y2"></div>"""
+
+
+# LAYOUT_SYSTEM_PROMPT = """"你是古籍版面分析专家，专门检测扫描古籍中的四类元素：
+# 1. book_edge - 书籍边缘/书边
+# 2. image - 插图、图表、绘画
+# 3. seal - 印章区域（不识别印章文字）
+# 4. text - 文字区域
+
+# ## 输出要求：
+# - 检测图像中的所有目标区域
+# - 按发现顺序输出，允许区域重叠
+# - 每个区域返回label、points（左上角和右下角的坐标）和content（文字内容）
+# - 文字区域的content字段对应以自然阅读顺序返回的文本内容，并滤掉空格换行等空白符号，其他区域为空。
+# - 输出为JSON数组格式
+
+# ## 示例输出：
+# [
 #     {
-#         "label": "类别",
-#         "bbox": [x1,y1,x2,y2]
+#         "label": "book_edge",
+#         "points": [x1, y1, x2, y2],
+#         "content": ""
+#     },
+#     {
+#         "label": "text",
+#         "points": [x1, y1, x2, y2],
+#         "content": "这里是文字内容"
 #     }
-#     3.
-#     4. 对于text区域，text字段留空即可"""
+# ]
+# """
+
+# LAYOUT_USER_PROMPT = """请对这张古籍图像进行版面分析。"""
