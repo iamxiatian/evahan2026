@@ -49,12 +49,17 @@ LoRA微调？参数如何选择？
 
 ```shell
 # Qwen2.5-VL-7B-Instruct直接利用modelscope下载即可
+pip install modelscope
 modelscope download --model Qwen/Qwen2.5-VL-7B-Instruct --local_dir ./Qwen2.5-VL-7B-Instruct
 
 modelscope download --model Qwen/Qwen2.5-VL-7B-Instruct-AWQ --local_dir ./Qwen2.5-VL-7B-Instruct-AWQ
 
 # Xunzi_Qwen2-VL-7B-Instruct
-huggingface-cli download --resume-download  RAY5/Xunzi_Qwen2_VL_7B_Instruct --local-dir Xunzi_Qwen2_VL_7B_Instruct
+wget https://hf-mirror.com/hfd/hfd.sh
+chmod a+x hfd.sh
+pip install aria2  -i https://mirrors.aliyun.com/pypi/simple/
+export HF_ENDPOINT=https://hf-mirror.com
+./hdf.sh RAY5/Xunzi_Qwen2_VL_7B_Instruct --local-dir Xunzi_Qwen2_VL_7B_Instruct
 ```
 
 ## 测评方法
