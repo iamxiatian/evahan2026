@@ -6,8 +6,9 @@ import shutil
 import typer
 from rich import print
 
-from evahan.util.image_rotate import rotate_folder
 from evahan.convert import convert_to_swift
+from evahan.util.image_rotate import rotate_folder
+
 
 def prepare_dataset(evahan_zip_path: str):
     """解压并准备Evahan数据集"""
@@ -26,12 +27,12 @@ def prepare_dataset(evahan_zip_path: str):
     print("Dataset_A 旋转完成")
     rotate_folder(dataset_C, dataset_C)  # 原地旋转
     print("Dataset_C 旋转完成")
-    
+
     # 生成swift格式的训练数据
     print("正在生成swift格式的数据...")
     convert_to_swift(format="jsonl", use_abs_img_path=True)
     convert_to_swift(format="json", use_abs_img_path=True)
-    
+
     print("数据集准备完成！")
 
 

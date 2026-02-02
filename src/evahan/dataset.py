@@ -28,7 +28,8 @@ class EvahanLayoutItem(NamedTuple):
 
 
 def load_evahan_ocr_dataset(dataset_path: Path) -> list[EvahanOcrItem]:
-    """读取Evahan2026的OCR数据集，对应于Dataset_A和Dataset_C这两个数据集。"""
+    """读取Evahan2026的OCR数据集的json文件，
+    对应于Dataset_A和Dataset_C这两个数据集。"""
     items: list[EvahanOcrItem] = []
     with dataset_path.open("r", encoding="utf-8") as f:
         for item in json.load(f):
@@ -42,7 +43,7 @@ def load_evahan_ocr_dataset(dataset_path: Path) -> list[EvahanOcrItem]:
 
 
 def load_evahan_layout_dataset(dataset_path: Path) -> list[EvahanLayoutItem]:
-    """读取Evahan2026的版面数据集，对应于Dataset_B这个数据集。"""
+    """读取Evahan2026的版面数据集的json文件，对应于Dataset_B这个数据集。"""
     items: list[EvahanLayoutItem] = []
     with dataset_path.open("r", encoding="utf-8") as f:
         for item in json.load(f):

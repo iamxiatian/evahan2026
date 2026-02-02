@@ -127,13 +127,5 @@ def convert_to_swift(format: Literal["json", "jsonl"], use_abs_img_path: bool):
 
 
 if __name__ == "__main__":
-    # ds_a = config.EVAHAN_TRAIN_PATH_A.parent / "Dataset_A.json"
-    # ds_b = config.EVAHAN_TRAIN_PATH_B.parent / "Dataset_B.json"
-    # ds_c = config.EVAHAN_TRAIN_PATH_C.parent / "Dataset_C.json"
-    # ds_a_items = load_evahan_ocr_dataset(ds_a)
-    # ds_b_items = load_evahan_layout_dataset(ds_b)
-    # ds_c_items = load_evahan_ocr_dataset(ds_c)
-    # validate()
-    # breakpoint()
     convert_to_swift(format="jsonl", use_abs_img_path=True)
     convert_to_swift(format="json", use_abs_img_path=True)

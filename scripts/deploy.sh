@@ -1,8 +1,8 @@
-CUDA_VISIBLE_DEVICES=0 \
+CUDA_VISIBLE_DEVICES=3 \
 swift deploy \
-    --model /data/app/workspace/models/Qwen2.5-VL-7B-Instruct-AWQ \
+    --model /data/app/workspace/models/Qwen2.5-VL-7B-Instruct \
     --infer_backend pt \
-    --vllm_gpu_memory_utilization 0.8 \
+    --vllm_gpu_memory_utilization 0.7 \
     --vllm_max_model_len 8192 \
-    --max_new_tokens 2048 \
+    --max_new_tokens 4096 \
     --served_model_name Qwen2.5-VL-7B-Instruct

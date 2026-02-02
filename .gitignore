@@ -1,6 +1,8 @@
 # Byte-compiled / optimized / DLL files
 dataset
 result/
+output/
+output_wuwen/
 __pycache__/
 *.py[codz]
 *$py.class

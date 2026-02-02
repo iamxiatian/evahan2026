@@ -14,7 +14,7 @@ from evahan import config
 
 client = OpenAI(
     api_key="EMPTY",
-    base_url="http://localhost:8002/v1",
+    base_url="http://localhost:8000/v1",
 )
 model_type = client.models.list().data[0].id
 print(f"model_type: {model_type}")
@@ -71,3 +71,4 @@ def test_layout():
 
 if __name__ == "__main__":
     test_layout()
+    test_ocr()
