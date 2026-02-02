@@ -25,7 +25,11 @@ uv run -m evahan.image_rotate ./dataset/train_data/Dataset_A_Raw_NotRotated ./da
 
 mv ./dataset/train_data/Dataset_C ./dataset/train_data/Dataset_C_Raw_NotRotated
 uv run -m evahan.image_rotate ./dataset/train_data/Dataset_C_Raw_NotRotated ./dataset/train_data/Dataset_C
+
+uv run -m evahan.convert
 ```
+
+此时，将生成Swift_A.jsonl等文件，方便swift微调。
 
 ## 思路
 

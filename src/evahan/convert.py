@@ -1,4 +1,5 @@
 import json
+from typing import Literal
 
 from evahan import config
 from evahan.dataset import (
@@ -70,7 +71,7 @@ def __convert_layout_item(
     }
 
 
-def __save(f, items: list[dict], format: str) -> None:
+def __save(f, items: list[dict], format: Literal["json", "jsonl"]) -> None:
     if format == "jsonl":
         for item in items:
             f.write(json.dumps(item, ensure_ascii=False) + "\n")
@@ -78,7 +79,7 @@ def __save(f, items: list[dict], format: str) -> None:
         json.dump(items, f, ensure_ascii=False, indent=2)
 
 
-def convert_to_swift(format: str, use_abs_img_path: bool):
+def convert_to_swift(format: Literal["json", "jsonl"], use_abs_img_path: bool):
     """
     将Evahan2026的数据集转换为Swift所需的格式。Swift标准格式如下：
 
@@ -99,7 +100,7 @@ def convert_to_swift(format: str, use_abs_img_path: bool):
     目前只有messages和images两个字段
 
     Args:
-        format (str): 文件存储格式，支持"jsonl"和"json"，如为json，则存储为数组，否则每一行为一个json对象
+        format (Literal["json", "jsonl"]): 保存格式
         use_abs_img_path (bool): 是否使用绝对路径
     """
 
@@ -107,19 +108,19 @@ def convert_to_swift(format: str, use_abs_img_path: bool):
     print("Convert Dataset_A to Swift format...")
     items = load_evahan_ocr_dataset(base_folder / "Dataset_A.json")
     items = [__convert_ocr_item(item, use_abs_img_path) for item in items]
-    with (base_folder / "Swift_A.json").open("w", encoding="utf-8") as f:
+    with (base_folder / f"Swift_A.{format}").open("w", encoding="utf-8") as f:
         __save(f, items, format)
 
     print("Convert Dataset_B to Swift format...")
     items = load_evahan_layout_dataset(base_folder / "Dataset_B.json")
     items = [__convert_layout_item(item, use_abs_img_path) for item in items]
-    with (base_folder / "Swift_B.json").open("w", encoding="utf-8") as f:
+    with (base_folder / f"Swift_B.{format}").open("w", encoding="utf-8") as f:
         __save(f, items, format)
 
     print("Convert Dataset_C to Swift format...")
     items = load_evahan_ocr_dataset(base_folder / "Dataset_C.json")
     items = [__convert_ocr_item(item, use_abs_img_path) for item in items]
-    with (base_folder / "Swift_C.json").open("w", encoding="utf-8") as f:
+    with (base_folder / f"Swift_C.{format}").open("w", encoding="utf-8") as f:
         __save(f, items, format)
 
     print("All Done!")
@@ -135,3 +136,4 @@ if __name__ == "__main__":
     # validate()
     # breakpoint()
     convert_to_swift(format="jsonl", use_abs_img_path=True)
+    convert_to_swift(format="json", use_abs_img_path=True)

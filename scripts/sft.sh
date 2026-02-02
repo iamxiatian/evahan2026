@@ -3,7 +3,7 @@
 CUDA_VISIBLE_DEVICES=0 \
 swift sft \
     --model /data/app/workspace/models/Qwen2.5-VL-7B-Instruct \
-    --dataset /data/app/workspace/evahan2026_dataset/train_data/Swift_B.json \
+    --dataset /data/app/workspace/evahan2026_dataset/train_data/Swift_B.jsonl \
     --train_type lora \
     --dtype float16 \
     --num_train_epochs 2 \
