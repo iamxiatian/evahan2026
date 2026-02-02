@@ -17,7 +17,6 @@ dependencies = [
     "vllm==0.11.0",
     "typer>=0.21.1",
     "openai>=2.16.0",
-    "gptqmodel>=4.2.5",
     "optimum>=2.1.0",
     "ipykernel>=7.1.0",
     "structlog>=25.5.0",
