@@ -123,3 +123,32 @@ def annotate(
             p4=region.points[3],
         )
     return image
+
+
+def annotate_bbox(
+    image_file: str | Path, regions: list[EvahanRegion]
+) -> Image.Image:
+    """
+    针对图像文件和区域列表进行标注
+    Args:
+        image_file: 图像文件路径
+        regions: 需要标注的区域列表
+    Returns:
+        标注后的PIL图像对象
+    """
+    image: Image.Image = Image.open(image_file).convert("RGB")
+    for region in regions:
+        # bbox format: [x1, y1, x2, y2]
+        p1 = (region.bbox[0], region.bbox[1]) # left top
+        p2 = (region.bbox[2], region.bbox[1]) # right top
+        p3 = (region.bbox[2], region.bbox[3]) # right bottom
+        p4 = (region.bbox[0], region.bbox[3]) # left bottom
+        image = __annot_region(
+            image=image,
+            label=region.label,
+            p1=p1,
+            p2=p2,
+            p3=p3,
+            p4=p4,
+        )
+    return image

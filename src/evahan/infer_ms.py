@@ -12,10 +12,10 @@ from rich import print
 from evahan import config
 
 
-model_path = "/data/app/workspace/models/Qwen2.5-VL-7B-Instruct-AWQ"
+model_path = config.QWEN_VL_7B_INSTRUCT
+print("model_path: ", model_path)
 
-
-def main(image_path: str):
+def main(image_path: str, prompt: str):
     # default: Load the model on the available device(s)
     model = Qwen2_5_VLForConditionalGeneration.from_pretrained(
         model_path, torch_dtype="auto", device_map="auto"
@@ -46,7 +46,7 @@ def main(image_path: str):
                     "type": "image",
                     "image": image_path,
                 },
-                {"type": "text", "text": config.OCR_USER_QUERY},
+                {"type": "text", "text": prompt},
             ],
         }
     ]
@@ -66,7 +66,7 @@ def main(image_path: str):
     inputs = inputs.to("cuda")
 
     # Inference: Generation of the output
-    generated_ids = model.generate(**inputs, max_new_tokens=128)
+    generated_ids = model.generate(**inputs, max_new_tokens=2048)
     generated_ids_trimmed = [
         out_ids[len(in_ids) :]
         for in_ids, out_ids in zip(inputs.input_ids, generated_ids, strict=True)
@@ -80,7 +80,7 @@ def main(image_path: str):
 
 
 if __name__ == "__main__":
-    test_image_path = (
-        "/data/app/workspace/evahan2026/dataset/train_data/Dataset_A/a_0001.jpg"
-    )
-    main(test_image_path)
+    # test_image_path = config.EVAHAN_TRAIN_PATH_A / "a_0015.jpg"
+    # main(str(test_image_path))
+    test_image_path = config.EVAHAN_TRAIN_PATH_B / "b_0001.jpg"
+    main(str(test_image_path), prompt=config.LAYOUT_USER_QUERY)

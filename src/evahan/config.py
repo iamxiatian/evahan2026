@@ -9,6 +9,8 @@ load_dotenv()
 
 QWEN_VL_7B_INSTRUCT = os.getenv("qwen_vl_7b_instruct")
 
+max_pixels = int(640*640)
+
 # 训练数据集的存放路径，该路径下存放了具体的三个数据集
 EVAHAN_DATA_PATH: Path = Path(
     os.getenv("evahan_dataset_parent_path", default="./dataset")
@@ -43,11 +45,11 @@ LAYOUT_USER_QUERY = """识别并标记古籍图像中的版面元素。
 - 文字区域的内容对应以自然阅读顺序返回的文本内容，并滤掉空格换行等空白符号；非文字区域的内容为空。
 
 ## 示例输出：
-<div class="book_edge" data-bbox="[[x1, y1], [x2, y2], [x3, y3],[x4, y4]]"></div>
-<div class="text" data-bbox="[[x1, y1], [x2, y2], [x3, y3],[x4, y4]]">文本区域的文字内容</div>
-<div class="seal" data-bbox="[[x1, y1], [x2, y2], [x3, y3],[x4, y4]]"></div>
-<div class="text" data-bbox="[[x1, y1], [x2, y2], [x3, y3],[x4, y4]]">文本区域的文字内容</div>
-<div class="image" data-bbox="[[x1, y1], [x2, y2], [x3, y3],[x4, y4]]"></div>"""
+<div class="book_edge" data-bbox="[x1, y1, x2, y2]"></div>
+<div class="text" data-bbox="[x1, y1, x2, y2]">文本区域的文字内容</div>
+<div class="seal" data-bbox="[x1, y1, x2, y2]"></div>
+<div class="text" data-bbox="[x1, y1, x2, y2]">文本区域的文字内容</div>
+<div class="image" data-bbox="[x1, y1, x2, y2]"></div>"""
 
 
 # LAYOUT_SYSTEM_PROMPT = """"你是古籍版面分析专家，专门检测扫描古籍中的四类元素：
