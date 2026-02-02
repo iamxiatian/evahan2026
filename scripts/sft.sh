@@ -1,11 +1,10 @@
-# bfloat16
-
-CUDA_VISIBLE_DEVICES=0 \
+export NCCL_P2P_DISABLE=1
+export NCCL_IB_DISABLE=1
+export CUDA_VISIBLE_DEVICES=0
 swift sft \
     --model /data/app/workspace/models/Qwen2.5-VL-7B-Instruct \
-    --dataset /data/app/workspace/evahan2026_dataset/train_data/Swift_B.jsonl \
+    --dataset /data/app/workspace/evahan2026/dataset/train_data/Swift_B.jsonl \
     --train_type lora \
-    --dtype float16 \
     --num_train_epochs 2 \
     --per_device_train_batch_size 1 \
     --per_device_eval_batch_size 1 \

@@ -38,4 +38,3 @@ def prepare_dataset(evahan_zip_path: str):
 if __name__ == "__main__":
     print("Usage: uv run -m evahan.prepare <path_to_evahan_zip>")
     typer.run(prepare_dataset)
-    
