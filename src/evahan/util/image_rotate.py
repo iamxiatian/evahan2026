@@ -16,7 +16,7 @@ supported_extensions = (
 )
 
 
-def rotate_image(input_path, output_path):
+def rotate_image_file(input_path, output_path):
     """Rotate the image 90 degrees clockwise and save"""
     with Image.open(input_path) as img:
         # Rotate clockwise 90 degrees
@@ -28,7 +28,7 @@ def rotate_image(input_path, output_path):
         print(f"Rotated and saved: {os.path.basename(output_path)}")
 
 
-def main(input_folder: str, output_folder: str) -> None:
+def rotate_folder(input_folder: str, output_folder: str) -> None:
     """
     将文件夹下的图片旋转90度
     Args:
@@ -41,12 +41,13 @@ def main(input_folder: str, output_folder: str) -> None:
 
     processed = 0
     skipped = 0
-    for filename in os.listdir(input_folder):
+    processing_files: list[str] = os.listdir(input_folder)
+    for filename in processing_files:
         if filename.lower().endswith(supported_extensions):
             input_path = os.path.join(input_folder, filename)
             output_path = os.path.join(output_folder, filename)
             try:
-                rotate_image(input_path, output_path)
+                rotate_image_file(input_path, output_path)
                 processed += 1
             except Exception as e:
                 print(f"Processing failed: {input_path} → {e}")
@@ -59,4 +60,4 @@ def main(input_folder: str, output_folder: str) -> None:
 
 
 if __name__ == "__main__":
-    typer.run(main)
+    typer.run(rotate_folder)

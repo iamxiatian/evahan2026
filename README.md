@@ -11,25 +11,21 @@
 dataset目录下为比赛放提供的原始数据和脚本转换后的数据，数据集较大，因此不放入git中控制，在Mac
 或Linux系统下，可以通过软连接的方式链接该目录。
 
-### 数据旋转
+### 数据旋转与预处理
 
-赛方提供的Dataset_A和Dataset_C两个数据集的图片阅读顺序需要旋转为正常的阅读顺序，运行以下脚本，
-可以将原来的文件夹重命名为Dataset_A_Raw_NotRotated，旋转后的文件夹继续使用原来的Dataset_A名字。
-Dataset_C同样处理。
+赛方提供的Dataset_A和Dataset_C两个数据集的图片阅读顺序需要旋转为正常的阅读顺序，运行以下脚本，将原始文件进行旋转并保存到新目录中。
 
-脚本如下：
+执行脚本可以完整一系列预处理：
 
-```shell
-mv ./dataset/train_data/Dataset_A ./dataset/train_data/Dataset_A_Raw_NotRotated
-uv run -m evahan.image_rotate ./dataset/train_data/Dataset_A_Raw_NotRotated ./dataset/train_data/Dataset_A
+   - 解压数据集到项目根目录下的dataset目录下
+   - 将数据集A和C进行原地旋转
+   - 生成适合Swift框架微调的数据集，分为数组格式的json文件、一行一个对象的jsonl文件
 
-mv ./dataset/train_data/Dataset_C ./dataset/train_data/Dataset_C_Raw_NotRotated
-uv run -m evahan.image_rotate ./dataset/train_data/Dataset_C_Raw_NotRotated ./dataset/train_data/Dataset_C
+执行脚本：
 
-uv run -m evahan.convert
+```bash
+uv run -m evahan.prepare /data/app/workspace/public_dataset/evahan2026.zip
 ```
-
-此时，将生成Swift_A.jsonl等文件，方便swift微调。
 
 ## 思路
 

@@ -19,7 +19,6 @@ dependencies = [
     "openai>=2.16.0",
     "gptqmodel>=4.2.5",
     "optimum>=2.1.0",
-    "flash-attn==2.8.3",
     "ipykernel>=7.1.0",
     "structlog>=25.5.0",
     "logbar>=0.2.1",
@@ -38,8 +37,8 @@ build-backend = "hatchling.build"
 name= "aliyun"
 url = "https://mirrors.aliyun.com/pypi/simple/"
 
-[tool.uv.extra-build-dependencies]
-flash-attn = ["torch"]
+#[tool.uv.extra-build-dependencies]
+#flash-attn = ["torch"]
 
 #[tool.uv.sources]
 #jdt-commons = { path = "assets/whl/jdt_commons-0.2.2-py3-none-any.whl" }
