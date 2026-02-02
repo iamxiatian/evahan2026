@@ -2,10 +2,11 @@ import json
 from pathlib import Path
 from typing import NamedTuple
 
+from PIL import Image
 from rich import print
 
 from evahan import config
-from evahan.util import annotator
+from evahan.util.annotator import annotate
 
 
 class EvahanOcrItem(NamedTuple):
@@ -92,102 +93,20 @@ def draw_elements(item: EvahanLayoutItem, out_file: str) -> None:
         item (EvahanLayoutItem): 版面元素数据项
         out_file (str): 输出图片路径
     """
-    image_file = config.EVAHAN_TRAIN_PATH_B.parent / item.image_path
-    image = annotator.annotate(image_file, item.regions)
+    raw_file = config.EVAHAN_TRAIN_PATH_B.parent / item.image_path
+    regions = item.regions
+    image: Image.Image = Image.open(raw_file).convert("RGB")
+    for region in regions:
+        image = annotate(
+            image=image,
+            label=region.label,
+            p1=region.points[0],
+            p2=region.points[1],
+            p3=region.points[2],
+            p4=region.points[3],
+        )
     image.save(out_file)
 
-
-def __convert_ocr_item(item: EvahanOcrItem) -> dict:
-    """将单个EvahanOcrItem转换为Swift LLM推理所需的格式。"""
-    messages = [
-        {
-            "role": "user",
-            "content": f"<image>{config.OCR_USER_QUERY}",
-        },
-        {
-            "role": "assistant",
-            "content": item.text,
-        },
-    ]
-    images = [item.image_path]
-    return {
-        "messages": messages,
-        "images": images,
-    }
-
-
-def __convert_layout_item(item: EvahanLayoutItem) -> dict:
-    """将单个EvahanLayoutItem转换为Swift LLM推理所需的格式。"""
-    response_text = ""
-    for region in item.regions:
-        response_text += f"""<div class="{region.label}" data-bbox="{region.points}">{region.text}</div>\n"""
-
-    messages = [
-        {
-            "role": "user",
-            "content": f"<image>{config.LAYOUT_USER_QUERY}",
-        },
-        {
-            "role": "assistant",
-            "content": response_text.strip(),
-        },
-    ]
-    images = [item.image_path]
-    return {
-        "messages": messages,
-        "images": images,
-    }
-
-
-def convert_to_swift():
-    """
-    将Evahan2026的数据集转换为Swift所需的格式。标准格式如下：
-    
-    ```json
-    {
-        "messages": [
-            {"role": "user", "content": "<image>这是什么"},
-            {"role": "assistant", "content": "这是一只小猫咪。"}
-        ],
-        "images": ["cat.png"],
-        "rejected_messages": [
-            {"role": "user", "content": "<image>这是什么"},
-            {"role": "assistant", "content": "这是一只小猫咪。"}
-        ],
-        "rejected_images": ["dog.png"]
-    }
-    ```
-    目前只有messages和images两个字段
-    """
-
-    base_folder = config.EVAHAN_TRAIN_PATH_A.parent # 原始训练集所在的父目录
-    print("Convert Dataset_A to Swift format...")
-    items = load_evahan_ocr_dataset(base_folder / "Dataset_A.json")
-    items = [__convert_ocr_item(item) for item in items]
-    with (base_folder / "Swift_A.json").open("w", encoding="utf-8") as f:
-        json.dump(items, f, ensure_ascii=False, indent=2)
-
-    print("Convert Dataset_B to Swift format...")
-    items = load_evahan_layout_dataset(base_folder / "Dataset_B.json")
-    items = [__convert_layout_item(item) for item in items]
-    with (base_folder / "Swift_B.json").open("w", encoding="utf-8") as f:
-        json.dump(items, f, ensure_ascii=False, indent=2)
-    
-    print("Convert Dataset_C to Swift format...")
-    items = load_evahan_ocr_dataset(base_folder / "Dataset_C.json")
-    items = [__convert_ocr_item(item) for item in items]
-    with (base_folder / "Swift_C.json").open("w", encoding="utf-8") as f:
-        json.dump(items, f, ensure_ascii=False, indent=2)
-    print("All Done!")
-
-
-
-# ds = MsDataset.load(
-#     "AI-ModelScope/LaTeX_OCR", subset_name="small", split="train"
-# )
-
-# print(ds[0]["text"])
-# ds[0]["image"].save("latex_ocr_sample_0.png")
 
 if __name__ == "__main__":
     # ds_a = config.EVAHAN_TRAIN_PATH_A.parent / "Dataset_A.json"
@@ -196,6 +115,4 @@ if __name__ == "__main__":
     # ds_a_items = load_evahan_ocr_dataset(ds_a)
     # ds_b_items = load_evahan_layout_dataset(ds_b)
     # ds_c_items = load_evahan_ocr_dataset(ds_c)
-    # validate()
-    # breakpoint()
-    convert_to_swift()
+    validate()

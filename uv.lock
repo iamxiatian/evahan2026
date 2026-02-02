@@ -1082,6 +1082,7 @@ dependencies = [
     { name = "flash-attn" },
     { name = "gptqmodel" },
     { name = "ipykernel" },
+    { name = "logbar" },
     { name = "ms-swift", extra = ["all"] },
     { name = "openai" },
     { name = "optimum" },
@@ -1100,6 +1101,7 @@ requires-dist = [
     { name = "flash-attn", specifier = "==2.8.3" },
     { name = "gptqmodel", specifier = ">=4.2.5" },
     { name = "ipykernel", specifier = ">=7.1.0" },
+    { name = "logbar", specifier = ">=0.2.1" },
     { name = "ms-swift", extras = ["all"], specifier = "==3.12.3" },
     { name = "openai", specifier = ">=2.16.0" },
     { name = "optimum", specifier = ">=2.1.0" },
@@ -2437,6 +2439,12 @@ sdist = { url = "https://mirrors.aliyun.com/pypi/packages/84/d5/41cd417ba7dfdbbc
 wheels = [
     { url = "https://mirrors.aliyun.com/pypi/packages/a0/ef/11292bb0b85cf4c93447cab5a29f64576ed14d3ab4280e35ddd23486594a/lm_format_enforcer-0.11.3-py3-none-any.whl", hash = "sha256:cf586350875def1ae7a8fba84fcbbfc8371424b6c9d05c1fcba70aa233fbf06f" },
 ]
+
+[[package]]
+name = "logbar"
+version = "0.2.1"
+source = { registry = "https://mirrors.aliyun.com/pypi/simple/" }
+sdist = { url = "https://mirrors.aliyun.com/pypi/packages/3d/cf/4040bd7bbb35c3339c2afe5dab66a5dc509c232650f0a11ff1a4f77dd9b8/logbar-0.2.1.tar.gz", hash = "sha256:77b25865af591b24a9eabba39f1e99f01d8ee54581d845430e2b0e4a30e8944d" }
 
 [[package]]
 name = "lxml"

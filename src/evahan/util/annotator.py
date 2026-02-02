@@ -1,8 +1,4 @@
-from pathlib import Path
-
 from PIL import Image, ImageDraw
-
-from evahan.dataset import EvahanRegion
 
 
 color_map: dict[str, tuple[int, int, int]] = {
@@ -36,7 +32,7 @@ def contrast_color(rgb) -> tuple[int, int, int]:
     return text_color
 
 
-def __annot_region(
+def annotate(
     image: Image.Image,
     label: str,
     p1: tuple[int, int],
@@ -98,28 +94,4 @@ def __annot_region(
         fill=text_color,
     )
 
-    return image
-
-
-def annotate(
-    image_file: str | Path, regions: list[EvahanRegion]
-) -> Image.Image:
-    """
-    针对图像文件和区域列表进行标注
-    Args:
-        image_file: 图像文件路径
-        regions: 需要标注的区域列表
-    Returns:
-        标注后的PIL图像对象
-    """
-    image: Image.Image = Image.open(image_file).convert("RGB")
-    for region in regions:
-        image = __annot_region(
-            image=image,
-            label=region.label,
-            p1=region.points[0],
-            p2=region.points[1],
-            p3=region.points[2],
-            p4=region.points[3],
-        )
     return image

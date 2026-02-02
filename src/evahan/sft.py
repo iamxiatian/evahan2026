@@ -4,18 +4,23 @@ import os
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 from peft import LoraConfig, get_peft_model
-from swift import get_model_processor, get_template, load_dataset
-from swift.dataset import LazyLLMDataset
+
+# from swift import get_model_processor, get_template, load_dataset
+from swift.llm import LazyLLMDataset, get_template, load_dataset
 from swift.trainers import Seq2SeqTrainer, Seq2SeqTrainingArguments
 from swift.utils import (
     get_logger,
     get_model_parameter_info,
-    get_multimodal_target_regex,
     plot_images,
     seed_everything,
 )
 
 from evahan import config
+
+
+train_A = config.EVAHAN_TRAIN_PATH_A.parent / "Swift_A.json"
+train_B = config.EVAHAN_TRAIN_PATH_B.parent / "Swift_B.json"
+train_C = config.EVAHAN_TRAIN_PATH_C.parent / "Swift_C.json"
 
 
 logger = get_logger()
@@ -29,7 +34,7 @@ output_dir = "output"
 
 # dataset
 dataset = [
-    "AI-ModelScope/LaTeX_OCR#20000"
+    train_A.as_posix()
 ]  # dataset_id or dataset_path. Sampling 20000 data points
 data_seed = 42
 max_length = 2048
@@ -74,7 +79,7 @@ training_args = Seq2SeqTrainingArguments(
 output_dir = os.path.abspath(os.path.expanduser(output_dir))
 logger.info(f"output_dir: {output_dir}")
 
-
+breakpoint()
 # Obtain the model and template
 model, processor = get_model_processor(model_id_or_path)
 logger.info(f"model_info: {model.model_info}")
