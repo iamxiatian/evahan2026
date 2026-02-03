@@ -35,14 +35,13 @@ def predict_ocr_trainset(ds_json_file: Path, out_jsonl_file: str):
 
     with open(out_jsonl_file, "w", encoding="utf-8") as f:
         for item in track(items, ds_json_file.name):
-            image_file = ds_json_file.parent / item.image_path
             response = client.query(
-                image_file.as_posix(), config.OCR_USER_QUERY
+                item.image_path.as_posix(), config.OCR_USER_QUERY
             )
             f.write(
                 json.dumps(
                     {
-                        "image_path": item.image_path,
+                        "image_path": item.relative_image_path,
                         "text": item.text,
                         "predicted": response,
                     },
