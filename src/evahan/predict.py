@@ -12,7 +12,7 @@ from evahan.dataset import (
     EvahanOcrItem,
     load_evahan_ocr_dataset,
 )
-from evahan.extract import extract_layout_item
+from evahan.extract import extract_layout_regions
 
 
 logger = structlog.get_logger()
@@ -112,13 +112,10 @@ def to_evaluate_format(
                 }
             elif task == "layout":
                 llm_output = item["predicted"]
-                iamge_path = config.EVAHAN_TRAIN_PATH / item["image_path"]
-                extracted_item = extract_layout_item(iamge_path, llm_output)
+                regions = extract_layout_regions(llm_output)
                 output_item = {
                     "image_path": item["image_path"],
-                    "regions": [
-                        region.to_dict() for region in extracted_item.regions
-                    ],
+                    "regions": [region.to_dict() for region in regions],
                 }
             else:
                 raise ValueError(f"Unknown task: {task}")

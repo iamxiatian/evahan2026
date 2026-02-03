@@ -67,11 +67,11 @@ if __name__ == "__main__":
     image_path: Path = config.EVAHAN_TRAIN_PATH_B / "b_0001.jpg"
     response = client.query(image_path.as_posix(), config.LAYOUT_USER_QUERY)
     print("Layout Response:\n", response)
-    from evahan.extract import extract_layout_item
+    from evahan.extract import extract_layout_regions
 
-    layout_item = extract_layout_item(image_path, response)
+    regions = extract_layout_regions(response)
 
-    print("Layout:\n", layout_item)
+    print("Layout Regions:\n", regions)
     from evahan.util.annotate import visualize_layout
 
-    visualize_layout(layout_item, save_path="./layout_viz.png")
+    visualize_layout(image_path, regions, save_path="./layout_viz.png")

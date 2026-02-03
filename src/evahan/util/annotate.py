@@ -1,6 +1,8 @@
+from pathlib import Path
+
 from PIL import Image, ImageDraw
 
-from evahan.core import EvahanLayoutItem
+from evahan.core import EvahanRegion
 
 
 color_map: dict[str, tuple[int, int, int]] = {
@@ -99,15 +101,16 @@ def draw_element(
     return image
 
 
-def visualize_layout(item: EvahanLayoutItem, save_path: str) -> None:
+def visualize_layout(
+    image_path: Path, regions: list[EvahanRegion], save_path: str | Path
+) -> None:
     """在图片上绘制版面元素区域，用于EvaHan2026版面元素的可视化验证。
     Args:
-        item (EvahanLayoutItem): 版面元素数据项
+        image_path (Path): 图片路径
+        regions (list[EvahanRegion]): 版面元素区域列表
         save_path (str): 输出图片路径
     """
-    raw_file = item.image_path.as_posix()
-    regions = item.regions
-    image: Image.Image = Image.open(raw_file).convert("RGB")
+    image: Image.Image = Image.open(image_path).convert("RGB")
     for region in regions:
         image = draw_element(
             image=image,

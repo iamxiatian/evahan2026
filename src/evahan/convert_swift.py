@@ -3,7 +3,10 @@
 """
 
 import json
+from logging import info
 from typing import Literal
+
+import structlog
 
 from evahan import config
 from evahan.dataset import (
@@ -12,6 +15,9 @@ from evahan.dataset import (
     load_evahan_layout_dataset,
     load_evahan_ocr_dataset,
 )
+
+
+logger = structlog.get_logger(__name__)
 
 
 def __convert_ocr_item(item: EvahanOcrItem, use_abs_img_path: bool) -> dict:
@@ -133,5 +139,8 @@ def convert_to_swift(format: Literal["json", "jsonl"], use_abs_img_path: bool):
 __all__ = [convert_to_swift]
 
 if __name__ == "__main__":
+    logger, info("Converting Evahan2026 dataset to Swift format...")
     convert_to_swift(format="jsonl", use_abs_img_path=True)
+
+    logger, info("Converting Evahan2026 dataset to json array format...")
     convert_to_swift(format="json", use_abs_img_path=True)

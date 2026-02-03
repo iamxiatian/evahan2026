@@ -1,21 +1,20 @@
 """解析LLM的输出结果，转变为结构化数据。"""
 
 import ast
-from pathlib import Path
 from typing import cast
 
 import structlog
 from bs4 import BeautifulSoup
 
-from evahan.dataset import EvahanLayoutItem, EvahanRegion
+from evahan.dataset import EvahanRegion
 
 
 logger = structlog.get_logger(__name__)
 
 
-def extract_layout_item(image_path: Path, llm_text: str) -> EvahanLayoutItem:
+def extract_layout_regions(llm_text: str) -> list[EvahanRegion]:
     """
-        解析布局生成模型的输出，将其转换为EvaHan2026格式。
+        解析布局生成模型的输出，提取出其中的版面元素区域列表。
         模型输出的结果示例：
 
         ```html
@@ -31,10 +30,7 @@ def extract_layout_item(image_path: Path, llm_text: str) -> EvahanLayoutItem:
             EvahanLayoutItem: 结构化的布局数据项。
     """
 
-    layout_item = EvahanLayoutItem(
-        image_path=image_path,
-        regions=[],
-    )
+    regions: list[EvahanRegion] = []
 
     # 1. 解析HTML内容
     soup = BeautifulSoup(llm_text, "html.parser")
@@ -54,7 +50,7 @@ def extract_layout_item(image_path: Path, llm_text: str) -> EvahanLayoutItem:
 
             if class_value != "text":
                 text_content = ""  # 非文字区域，文本内容为空
-            layout_item.regions.append(
+            regions.append(
                 EvahanRegion(
                     label=class_value, points=points, text=text_content
                 )
@@ -62,4 +58,4 @@ def extract_layout_item(image_path: Path, llm_text: str) -> EvahanLayoutItem:
         except Exception as e:
             logger.warning(f"解析div布局项失败，忽略该元素：{div}", error=e)
 
-    return layout_item
+    return regions
