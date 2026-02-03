@@ -19,17 +19,6 @@ client = OpenAI(
 model_type = client.models.list().data[0].id
 print(f"model_type: {model_type}")
 
-# use base64
-# import base64
-# with open('rose.jpg', 'rb') as f:
-#     img_base64 = base64.b64encode(f.read()).decode('utf-8')
-# image_url = f'data:image/jpeg;base64,{img_base64}'
-
-# use local_path
-# from swift.llm import convert_to_base64
-# image_url = convert_to_base64(images=['rose.jpg'])['images'][0]
-# image_url = f'data:image/jpeg;base64,{image_url}'
-
 
 def query(image_url: str, query: str, system: str | None = None) -> str:
     messages = [

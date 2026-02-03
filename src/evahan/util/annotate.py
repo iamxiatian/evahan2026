@@ -1,5 +1,7 @@
 from PIL import Image, ImageDraw
 
+from evahan.core import EvahanLayoutItem
+
 
 color_map: dict[str, tuple[int, int, int]] = {
     "book_edge": (255, 0, 0),  # 红色
@@ -32,7 +34,7 @@ def contrast_color(rgb) -> tuple[int, int, int]:
     return text_color
 
 
-def annotate(
+def draw_element(
     image: Image.Image,
     label: str,
     p1: tuple[int, int],
@@ -43,9 +45,9 @@ def annotate(
     """
     在图像上标注元素
     Args:
-     image: PIL图像对象
-     label: 元素标签
-     points: 元素边界框坐标列表, 顺序为左上、右上、右下、左下
+        image: PIL图像对象
+        label: 元素标签
+        points: 元素边界框坐标列表, 顺序为左上、右上、右下、左下
     """
     # 创建可绘制对象
     draw = ImageDraw.Draw(image, mode="RGBA")  # 启用alpha通道支持透明度
@@ -95,3 +97,24 @@ def annotate(
     )
 
     return image
+
+
+def visualize_layout(item: EvahanLayoutItem, save_path: str) -> None:
+    """在图片上绘制版面元素区域，用于EvaHan2026版面元素的可视化验证。
+    Args:
+        item (EvahanLayoutItem): 版面元素数据项
+        save_path (str): 输出图片路径
+    """
+    raw_file = item.image_path.as_posix()
+    regions = item.regions
+    image: Image.Image = Image.open(raw_file).convert("RGB")
+    for region in regions:
+        image = draw_element(
+            image=image,
+            label=region.label,
+            p1=region.points[0],
+            p2=region.points[1],
+            p3=region.points[2],
+            p4=region.points[3],
+        )
+    image.save(save_path)

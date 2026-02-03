@@ -1,30 +1,10 @@
 import json
 from pathlib import Path
-from typing import NamedTuple
 
-from PIL import Image
 from rich import print
 
 from evahan import config
-from evahan.util.annotator import annotate
-
-
-class EvahanOcrItem(NamedTuple):
-    image_path: str  # 图片路径
-    text: str  # 图片中的文本内容
-
-
-class EvahanRegion(NamedTuple):
-    label: str  # 版面元素类别
-    text: str  # 元素中的文本内容
-    points: list[
-        tuple[int, int]
-    ]  # 元素的顶点坐标列表，顺序：左上、右上、右下、左下
-
-
-class EvahanLayoutItem(NamedTuple):
-    image_path: str  # 图片路径
-    regions: list[EvahanRegion]  # 版面元素列表
+from evahan.core import EvahanLayoutItem, EvahanOcrItem, EvahanRegion
 
 
 def load_evahan_ocr_dataset(dataset_path: Path) -> list[EvahanOcrItem]:
@@ -35,7 +15,7 @@ def load_evahan_ocr_dataset(dataset_path: Path) -> list[EvahanOcrItem]:
         for item in json.load(f):
             items.append(
                 EvahanOcrItem(
-                    image_path=item["image_path"],
+                    image_path=dataset_path.parent / item["image_path"],
                     text=item["text"],
                 )
             )
@@ -58,7 +38,7 @@ def load_evahan_layout_dataset(dataset_path: Path) -> list[EvahanLayoutItem]:
                 )
             items.append(
                 EvahanLayoutItem(
-                    image_path=item["image_path"],
+                    image_path=dataset_path.parent / item["image_path"],
                     regions=regions,
                 )
             )
@@ -86,27 +66,6 @@ def validate() -> None:
                 print(f"{item.image_path} has invalid coordinates: {region}")
     print(f"Total elements: {element_count}")
     print(f"Irregular elements: {irregular_count}")
-
-
-def draw_elements(item: EvahanLayoutItem, out_file: str) -> None:
-    """在图片上绘制版面元素区域，用于可视化验证。
-    Args:
-        item (EvahanLayoutItem): 版面元素数据项
-        out_file (str): 输出图片路径
-    """
-    raw_file = config.EVAHAN_TRAIN_PATH_B.parent / item.image_path
-    regions = item.regions
-    image: Image.Image = Image.open(raw_file).convert("RGB")
-    for region in regions:
-        image = annotate(
-            image=image,
-            label=region.label,
-            p1=region.points[0],
-            p2=region.points[1],
-            p3=region.points[2],
-            p4=region.points[3],
-        )
-    image.save(out_file)
 
 
 if __name__ == "__main__":

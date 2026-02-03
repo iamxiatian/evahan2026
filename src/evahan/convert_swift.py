@@ -1,3 +1,7 @@
+"""
+数据转换脚本，将默认的Evahan2026数据集转换为适合Swfit框架的模型微调数据集
+"""
+
 import json
 from typing import Literal
 
@@ -17,9 +21,9 @@ def __convert_ocr_item(item: EvahanOcrItem, use_abs_img_path: bool) -> dict:
         item (EvahanOcrItem): Evahan OCR数据项
         use_abs_img_path (bool): 是否使用绝对路径
     """
-    img_path = item.image_path
+    img_path = item.relative_image_path
     if use_abs_img_path:
-        img_path = f"{config.EVAHAN_DATA_PATH}/train_data/{item.image_path}"
+        img_path = item.image_path.as_posix()
 
     messages = [
         {
@@ -46,9 +50,9 @@ def __convert_layout_item(
         item (EvahanLayoutItem): Evahan布局数据项
         use_abs_img_path (bool): 是否使用绝对路径
     """
-    img_path = item.image_path
+    img_path = item.relative_image_path
     if use_abs_img_path:
-        img_path = f"{config.EVAHAN_DATA_PATH}/train_data/{item.image_path}"
+        img_path = item.image_path.as_posix()
 
     response_text = ""
     for region in item.regions:
@@ -125,6 +129,8 @@ def convert_to_swift(format: Literal["json", "jsonl"], use_abs_img_path: bool):
 
     print("All Done!")
 
+
+__all__ = [convert_to_swift]
 
 if __name__ == "__main__":
     convert_to_swift(format="jsonl", use_abs_img_path=True)

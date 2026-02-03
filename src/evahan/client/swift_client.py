@@ -1,0 +1,77 @@
+"""
+采用Swift的方式，调用本地部署的模型服务进行图文问答。
+
+需要提前运行：./scripts/deploy.sh
+
+"""
+
+from pathlib import Path
+from typing import cast
+
+from rich import print
+from swift.llm import InferClient, InferRequest, RequestConfig
+
+from evahan import config
+
+
+class Client:
+    def __init__(self, host: str = "127.0.0.1", port: int = 8000):
+        self.engine = InferClient(host="127.0.0.1", port=8000)
+        # model_path = "/data/app/workspace/models/Qwen2.5-VL-7B-Instruct"
+        # self.engine = PtEngine(model_path, max_batch_size=2)
+
+    def query(
+        self,
+        image_url: str,
+        query: str,
+        system: str | None = None,
+        max_tokens=8192,
+        temperature=0,
+    ) -> str:
+        messages = [
+            {
+                "role": "user",
+                "content": f"<image>{query}",
+            }
+        ]
+
+        # 插入system消息
+        if system:
+            messages.insert(
+                0,
+                {"role": "system", "content": system},
+            )
+
+        request_config = RequestConfig(
+            max_tokens=max_tokens, temperature=temperature
+        )
+        infer_requests = [
+            InferRequest(
+                messages=messages,
+                images=[
+                    image_url,
+                ],
+            )
+        ]
+        resp_list = self.engine.infer(infer_requests, request_config)
+        response: str = cast(str, resp_list[0].choices[0].message.content)
+        return response
+
+
+if __name__ == "__main__":
+    client = Client(host="127.0.0.1", port=8000)
+    # image_path = config.EVAHAN_TRAIN_PATH_A / "a_0001.jpg"
+    # response = client.query(image_path.as_posix(), config.OCR_USER_QUERY)
+    # print("OCR:\n", response)
+
+    image_path: Path = config.EVAHAN_TRAIN_PATH_B / "b_0001.jpg"
+    response = client.query(image_path.as_posix(), config.LAYOUT_USER_QUERY)
+    print("Layout Response:\n", response)
+    from evahan.extract import extract_layout_item
+
+    layout_item = extract_layout_item(image_path, response)
+
+    print("Layout:\n", layout_item)
+    from evahan.util.annotate import visualize_layout
+
+    visualize_layout(layout_item, save_path="./layout_viz.png")
