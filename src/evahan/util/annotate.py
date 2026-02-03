@@ -120,4 +120,8 @@ def visualize_layout(
             p3=region.points[2],
             p4=region.points[3],
         )
+
+    if not save_path.parent.exists():
+        save_path.parent.mkdir(parents=True, exist_ok=True)
+
     image.save(save_path)
