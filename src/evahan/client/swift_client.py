@@ -16,7 +16,7 @@ from evahan import config
 
 class Client:
     def __init__(self, host: str = "127.0.0.1", port: int = 8000):
-        self.engine = InferClient(host="127.0.0.1", port=8000)
+        self.engine = InferClient(host=host, port=port)
         # model_path = "/data/app/workspace/models/Qwen2.5-VL-7B-Instruct"
         # self.engine = PtEngine(model_path, max_batch_size=2)
 

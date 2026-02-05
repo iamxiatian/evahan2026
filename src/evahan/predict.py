@@ -212,6 +212,7 @@ def run_testset(
         port (int): vllm服务的端口号
     """
     # 初始化需要访问vllm服务的客户端
+    logger.info(f"Connect to Swift server at {host}:{port}")
     client = Client(host=host, port=port)
     predictor = Predictor(client)
 
