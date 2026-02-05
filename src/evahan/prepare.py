@@ -38,15 +38,24 @@ def __annotate_dataset_b():
     print(f"可视化版面图像已保存到 {out_path}")
 
 
-def prepare_dataset(evahan_zip_path: str):
+def __extract_zip(zip_file: str, extract_to: str):
+    """解压zip文件到指定目录"""
+    if not os.path.exists(extract_to):
+        os.makedirs(extract_to)
+    shutil.unpack_archive(zip_file, extract_to)
+    print(f"已解压 {zip_file} 到 {extract_to}")
+
+
+def prepare_dataset(
+    trainset_zip_file: str, testset_zip_file: str | None = None
+):
     """解压并准备Evahan数据集"""
     extract_to: str = "./dataset"
     if not os.path.exists(extract_to):
         os.makedirs(extract_to)
 
-    print(f"正在解压数据集 {evahan_zip_path} ...")
-    shutil.unpack_archive(evahan_zip_path, extract_to)
-    print(f"数据集已解压到 {extract_to}")
+    print(f"正在解压数据集 {trainset_zip_file} ...")
+    __extract_zip(trainset_zip_file, extract_to)
 
     # 数据集A和数据集C需要执行旋转处理
     dataset_A = os.path.join(extract_to, "train_data", "Dataset_A")
@@ -64,10 +73,19 @@ def prepare_dataset(evahan_zip_path: str):
     print("正在生成数据集B生成可视化版面图...")
     __annotate_dataset_b()
 
+    if testset_zip_file:
+        print(f"正在解压数据集 {testset_zip_file} ...")
+        __extract_zip(testset_zip_file, extract_to)
+        # 重命名TestData为test_data以保持一致性
+        shutil.move(
+            os.path.join(extract_to, "TestData"),
+            os.path.join(extract_to, "test_data"),
+        )
+
     print("数据集准备完成！")
 
 
 if __name__ == "__main__":
-    print("Usage: uv run -m evahan.prepare <path_to_evahan_zip>")
-    #typer.run(prepare_dataset)
-    __annotate_dataset_b()
+    print("Usage: uv run -m evahan.prepare <trainset_zip> <testset_zip>")
+    typer.run(prepare_dataset)
+    # __annotate_dataset_b()

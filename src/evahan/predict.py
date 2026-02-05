@@ -10,6 +10,7 @@ from evahan.client.swift_client import Client
 from evahan.dataset import (
     EvahanLayoutItem,
     EvahanOcrItem,
+    load_evahan_layout_dataset,
     load_evahan_ocr_dataset,
 )
 from evahan.extract import extract_layout_regions
@@ -21,7 +22,21 @@ logger = structlog.get_logger()
 client = Client(host="127.0.0.1", port=8000)
 
 
-def predict_ocr_trainset(ds_json_file: Path, out_jsonl_file: str):
+def __read_predicted(out_file: Path) -> dict[str, str]:
+    """读取已经预测过的图片，避免重复预测"""
+    predicated_images: dict[str, str] = {}
+    if out_file.exists():
+        lines = out_file.read_text(encoding="utf-8").splitlines()
+        lines = [line.strip() for line in lines if line.strip()]
+        for line in lines:
+            item = json.loads(line)
+            predicated_images[item["image_path"]] = line
+    return predicated_images
+
+
+def predict_ocr_trainset(
+    ds_json_file: Path, out_jsonl_file: str, resume: bool = True
+) -> None:
     """
     对dataset_path目录下的图片文件，执行OCR识别，返回一个jsonline文件。
     jsonline文件中每一行是一个对象：
@@ -30,11 +45,23 @@ def predict_ocr_trainset(ds_json_file: Path, out_jsonl_file: str):
     Args:
         ds_json_file (str): EvaHan原始数据集对应的json文件
         out_jsonl_file (str): 保存到的jsonline文件名称
+        resume(bool): 是否从已有的out_jsonl_file中断点继续
     """
     items: list[EvahanOcrItem] = load_evahan_ocr_dataset(ds_json_file)
+    out_file = Path(out_jsonl_file)
+    # 读取已预测的图片，避免重复预测, 主键为image_path，值为整行json字符串
+    predicated_images: dict[str, str] = (
+        __read_predicted(out_file) if resume and out_file.exists() else {}
+    )
 
     with open(out_jsonl_file, "w", encoding="utf-8") as f:
         for item in track(items, ds_json_file.name):
+            # 先读取已预测的结果，避免重复预测
+            if item.relative_image_path in predicated_images:
+                f.write(predicated_images[item.relative_image_path])
+                f.write("\n")
+                continue
+
             response = client.query(
                 item.image_path.as_posix(), config.OCR_USER_QUERY
             )
@@ -53,7 +80,9 @@ def predict_ocr_trainset(ds_json_file: Path, out_jsonl_file: str):
     logger.info(f"predict: {ds_json_file}, save to:{out_jsonl_file}")
 
 
-def predict_layout_trainset(ds_json_file: Path, out_jsonl_file: str) -> None:
+def predict_layout_trainset(
+    ds_json_file: Path, out_jsonl_file: str, resume: bool = True
+) -> None:
     """对dataset_path目录下的图片文件，执行版面元素识别，返回一个jsonline文件。
     jsonline文件中每一行是一个对象：
     {"image_path":"file path", "response": "llm output text"}
@@ -61,10 +90,24 @@ def predict_layout_trainset(ds_json_file: Path, out_jsonl_file: str) -> None:
     Args:
         ds_json_file (str): EvaHan原始数据集对应的json文件
         out_jsonl_file (str): 保存到的jsonline文件名称
+        resume(bool): 是否从已有的out_jsonl_file中断点继续
     """
-    items: list[EvahanLayoutItem] = load_evahan_ocr_dataset(ds_json_file)
+    items: list[EvahanLayoutItem] = load_evahan_layout_dataset(ds_json_file)
+
+    out_file = Path(out_jsonl_file)
+    # 读取已预测的图片，避免重复预测, 主键为image_path，值为整行json字符串
+    predicated_images: dict[str, str] = (
+        __read_predicted(out_file) if resume and out_file.exists() else {}
+    )
+
     with open(out_jsonl_file, "w", encoding="utf-8") as f:
         for item in track(items, ds_json_file.name):
+            # 先读取已预测的结果，避免重复预测
+            if item.relative_image_path in predicated_images:
+                f.write(predicated_images[item.relative_image_path])
+                f.write("\n")
+                continue
+
             response = client.query(
                 item.image_path.as_posix(), config.LAYOUT_USER_QUERY
             )
