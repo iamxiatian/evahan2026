@@ -44,8 +44,12 @@ def extract_layout_regions(llm_text: str) -> list[EvahanRegion]:
             logger.warning(f"div元素缺少class属性，跳过该元素：{div}")
             continue  # 如果没有class属性，跳过该div
 
-        # 提取data-bbox属性（如果没有则返回空字符串）
+        # 提取data-bbox属性, 由于大模型结果的不可靠，需要滤掉开始和结尾的其他符号
         data_bbox_value: str = str(div.get("data-bbox", ""))
+        p1:int = data_bbox_value.find("[")
+        p2:int = data_bbox_value.rfind("]")
+        data_bbox_value = data_bbox_value[p1: p2+1]
+
         # 提取div中间的文本内容（去除首尾空白）
         text_content = div.get_text(strip=True)
 

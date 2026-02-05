@@ -17,6 +17,7 @@ from evahan import config
 from evahan.client.swift_client import Client
 from evahan.extract import extract_layout_regions
 from evahan.util import file_util
+from evahan.viz_layout import draw_testset_results
 
 
 logger = structlog.get_logger(__name__)
@@ -228,6 +229,10 @@ def run_testset(
         run_name,
         resume=True,
     )
+
+    # 可视化版面的预测结果
+    logger.info("visualize layout test result.")
+    draw_testset_results(run_name)
 
 
 if __name__ == "__main__":
