@@ -11,8 +11,6 @@ logger = structlog.get_logger()
 
 load_dotenv()
 
-QWEN_VL_7B_INSTRUCT = os.getenv("qwen_vl_7b_instruct")
-
 # Evahan数据集的存放路径
 EVAHAN_DATA_PATH: Path = Path(
     os.getenv("evahan_dataset_parent_path", default="./dataset")
@@ -26,6 +24,7 @@ EVAHAN_TRAIN_PATH_A: Path = EVAHAN_TRAIN_PATH / "Dataset_A"
 EVAHAN_TRAIN_PATH_B: Path = EVAHAN_TRAIN_PATH / "Dataset_B"
 EVAHAN_TRAIN_PATH_C: Path = EVAHAN_TRAIN_PATH / "Dataset_C"
 
+# 测试数据集的目录
 EVAHAN_TESTSET_PATH: Path = EVAHAN_DATA_PATH / "test_data"
 
 
