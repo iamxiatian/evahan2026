@@ -1,7 +1,7 @@
 from pathlib import Path
 
 
-def list_images(folder: Path, recursive: bool = False) -> list[Path]:
+def list_image_files(folder: Path, recursive: bool = False) -> list[Path]:
     """列出文件夹下所有图片文件
 
     Args:
