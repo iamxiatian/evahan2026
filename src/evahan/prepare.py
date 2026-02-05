@@ -2,6 +2,7 @@
 
 import os
 import shutil
+from pathlib import Path
 
 import typer
 from rich import print
@@ -46,14 +47,7 @@ def __extract_zip(zip_file: str, extract_to: str):
     print(f"已解压 {zip_file} 到 {extract_to}")
 
 
-def prepare_dataset(
-    trainset_zip_file: str, testset_zip_file: str | None = None
-):
-    """解压并准备Evahan数据集"""
-    extract_to: str = "./dataset"
-    if not os.path.exists(extract_to):
-        os.makedirs(extract_to)
-
+def __prepare_trainset(extract_to: str, trainset_zip_file: str) -> None:
     print(f"正在解压数据集 {trainset_zip_file} ...")
     __extract_zip(trainset_zip_file, extract_to)
 
@@ -73,14 +67,32 @@ def prepare_dataset(
     print("正在生成数据集B生成可视化版面图...")
     __annotate_dataset_b()
 
-    if testset_zip_file:
-        print(f"正在解压数据集 {testset_zip_file} ...")
-        __extract_zip(testset_zip_file, extract_to)
-        # 重命名TestData为test_data以保持一致性
-        shutil.move(
-            os.path.join(extract_to, "TestData"),
-            os.path.join(extract_to, "test_data"),
-        )
+
+def __prepare_testset(extract_to: str, testset_zip_file: str) -> None:
+    print(f"正在解压数据集 {testset_zip_file} ...")
+    __extract_zip(testset_zip_file, extract_to)
+    # 重命名TestData为test_data以保持一致性
+    shutil.move(
+        os.path.join(extract_to, "TestData"),
+        os.path.join(extract_to, "test_data"),
+    )
+
+
+def prepare_dataset(trainset_zip_file: str, testset_zip_file: str):
+    """解压并准备Evahan数据集"""
+    extract_to: str = "./dataset"
+    if not os.path.exists(extract_to):
+        os.makedirs(extract_to)
+
+    if Path(trainset_zip_file).exists():
+        __prepare_trainset(extract_to, trainset_zip_file)
+    else:
+        print(f"训练集文件 {trainset_zip_file} 不存在，跳过解压。")
+
+    if Path(testset_zip_file).exists():
+        __prepare_testset(extract_to, testset_zip_file)
+    else:
+        print(f"测试集文件 {testset_zip_file} 不存在，跳过解压。")
 
     print("数据集准备完成！")
 

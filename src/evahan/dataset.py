@@ -12,13 +12,13 @@ def load_evahan_ocr_dataset(dataset_path: Path) -> list[EvahanOcrItem]:
     对应于Dataset_A和Dataset_C这两个数据集。"""
     items: list[EvahanOcrItem] = []
     with dataset_path.open("r", encoding="utf-8") as f:
-        for item in json.load(f):
-            items.append(
-                EvahanOcrItem(
-                    image_path=dataset_path.parent / item["image_path"],
-                    text=item["text"],
-                )
+        items = [
+            EvahanOcrItem(
+                image_path=dataset_path.parent / item["image_path"],
+                text=item["text"],
             )
+            for item in json.load(f)
+        ]
     return items
 
 
@@ -27,15 +27,15 @@ def load_evahan_layout_dataset(dataset_path: Path) -> list[EvahanLayoutItem]:
     items: list[EvahanLayoutItem] = []
     with dataset_path.open("r", encoding="utf-8") as f:
         for item in json.load(f):
-            regions = []
-            for region in item["regions"]:
-                regions.append(
-                    EvahanRegion(
-                        label=region["label"],
-                        text=region["text"],
-                        points=region["points"],
-                    )
+            regions = [
+                EvahanRegion(
+                    label=region["label"],
+                    text=region["text"],
+                    points=region["points"],
                 )
+                for region in item["regions"]
+            ]
+
             items.append(
                 EvahanLayoutItem(
                     image_path=dataset_path.parent / item["image_path"],
