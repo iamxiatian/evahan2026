@@ -6,37 +6,39 @@ from pathlib import Path
 
 import typer
 from rich import print
-from rich.progress import track
 
+from evahan import config
 from evahan.convert_swift import convert_to_swift
+from evahan.core import EvahanRegion
+from evahan.dataset import load_evahan_layout_dataset
 from evahan.util.image_rotate import rotate_folder
+from evahan.viz_layout import draw_layout
 
 
 def __annotate_dataset_b():
     """为数据集B生成可视化版面图像，方便查看标注是否正确"""
-    from pathlib import Path
 
-    from evahan.dataset import load_evahan_layout_dataset
-    from evahan.util.annotate import visualize_layout
-
-    base_folder = Path("./dataset/train_data")
+    base_folder = config.EVAHAN_TRAINSET_PATH
     json_file = base_folder / "Dataset_B.json"
-    out_path = base_folder / "Dataset_B_annotated"
+    image_folder = base_folder / "Dataset_B"
+    save_folder = base_folder / "Dataset_B_annotated"
 
-    if out_path.exists():
-        print(f"目录 {out_path} 已存在，跳过可视化生成")
+    if save_folder.exists():
+        print(f"目录 {save_folder} 已存在，跳过可视化生成")
         return
 
     layout_items = load_evahan_layout_dataset(json_file)
-    for item in track(layout_items, description="正在生成可视化版面图像..."):
-        img_path = base_folder / item.relative_image_path
-        save_path = out_path / item.image_path.name
-        visualize_layout(
-            img_path,
-            item.regions,
-            save_path=save_path,
-        )
-    print(f"可视化版面图像已保存到 {out_path}")
+    layout_dict: dict[str, list[EvahanRegion]] = {
+        item.relative_image_path: item.regions for item in layout_items
+    }
+
+    draw_layout(
+        image_folder=image_folder,
+        save_folder=save_folder,
+        layout_dict=layout_dict,
+    )
+
+    print(f"可视化版面图像已保存到 {save_folder}")
 
 
 def __extract_zip(zip_file: str, extract_to: str):

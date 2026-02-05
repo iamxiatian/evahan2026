@@ -188,15 +188,15 @@ def run_trainset(
     predictor = Predictor(client)
 
     folders = [
-        config.EVAHAN_TRAIN_PATH_A,
-        config.EVAHAN_TRAIN_PATH_B,
-        config.EVAHAN_TRAIN_PATH_C,
+        config.EVAHAN_TRAINSET_A,
+        config.EVAHAN_TRAINSET_B,
+        config.EVAHAN_TRAINSET_C,
     ]
-    task_types = ["ocr", "layout", "ocr"]
+    task_types: list[Literal["ocr", "layout"]] = ["ocr", "layout", "ocr"]
     predictor.run(
         folders,
         task_types,
-        run_name,
+        f"train_{run_name}",
         resume=True,
     )
 
@@ -221,7 +221,7 @@ def run_testset(
         config.EVAHAN_TESTSET_PATH / "Task_B",
         config.EVAHAN_TESTSET_PATH / "Task_C",
     ]
-    task_types = ["ocr", "layout", "ocr"]
+    task_types: list[Literal["ocr", "layout"]] = ["ocr", "layout", "ocr"]
     predictor.run(
         test_folders,
         task_types,

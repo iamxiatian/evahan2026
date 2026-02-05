@@ -3,10 +3,9 @@
 """
 
 import json
-from logging import info
 from typing import Literal
 
-import structlog
+from rich import print
 
 from evahan import config
 from evahan.dataset import (
@@ -17,21 +16,23 @@ from evahan.dataset import (
 )
 
 
-logger = structlog.get_logger(__name__)
+CHAT_INSTANCE_TYPE = dict[str, list[dict[str, str]] | list[str]]
 
 
-def __convert_ocr_item(item: EvahanOcrItem, use_abs_img_path: bool) -> dict:
+def __convert_ocr_item(
+    item: EvahanOcrItem, use_abs_img_path: bool
+) -> CHAT_INSTANCE_TYPE:
     """
     将单个EvahanOcrItem转换为Swift LLM推理所需的格式。
     Args:
         item (EvahanOcrItem): Evahan OCR数据项
         use_abs_img_path (bool): 是否使用绝对路径
     """
-    img_path = item.relative_image_path
+    img_path: str = item.relative_image_path
     if use_abs_img_path:
         img_path = item.image_path.as_posix()
 
-    messages = [
+    messages: list[dict[str, str]] = [
         {
             "role": "user",
             "content": f"<image>{config.OCR_USER_QUERY}",
@@ -41,16 +42,17 @@ def __convert_ocr_item(item: EvahanOcrItem, use_abs_img_path: bool) -> dict:
             "content": item.text,
         },
     ]
-    images = [img_path]
-    return {
+    images: list[str] = [img_path]
+    chat_instance: CHAT_INSTANCE_TYPE = {
         "messages": messages,
         "images": images,
     }
+    return chat_instance
 
 
 def __convert_layout_item(
     item: EvahanLayoutItem, use_abs_img_path: bool
-) -> dict:
+) -> CHAT_INSTANCE_TYPE:
     """将单个EvahanLayoutItem转换为Swift LLM推理所需的格式。
     Args:
         item (EvahanLayoutItem): Evahan布局数据项
@@ -60,9 +62,12 @@ def __convert_layout_item(
     if use_abs_img_path:
         img_path = item.image_path.as_posix()
 
-    response_text = ""
-    for region in item.regions:
-        response_text += f"""<div class="{region.label}" data-bbox="{region.points}">{region.text}</div>\n"""
+    response_text: str = "".join(
+        [
+            f"""<div class="{region.label}" data-bbox="{region.points}">{region.text}</div>\n"""
+            for region in item.regions
+        ]
+    )
 
     messages = [
         {
@@ -81,7 +86,9 @@ def __convert_layout_item(
     }
 
 
-def __save(f, items: list[dict], format: Literal["json", "jsonl"]) -> None:
+def __save(
+    f, items: list[CHAT_INSTANCE_TYPE], format: Literal["json", "jsonl"]
+) -> None:
     if format == "jsonl":
         for item in items:
             f.write(json.dumps(item, ensure_ascii=False) + "\n")
@@ -114,7 +121,7 @@ def convert_to_swift(format: Literal["json", "jsonl"], use_abs_img_path: bool):
         use_abs_img_path (bool): 是否使用绝对路径
     """
 
-    base_folder = config.EVAHAN_TRAIN_PATH_A.parent  # 原始训练集所在的父目录
+    base_folder = config.EVAHAN_TRAINSET_A.parent  # 原始训练集所在的父目录
     print("Convert Dataset_A to Swift format...")
     items = load_evahan_ocr_dataset(base_folder / "Dataset_A.json")
     items = [__convert_ocr_item(item, use_abs_img_path) for item in items]
@@ -136,11 +143,9 @@ def convert_to_swift(format: Literal["json", "jsonl"], use_abs_img_path: bool):
     print("All Done!")
 
 
-__all__ = [convert_to_swift]
-
 if __name__ == "__main__":
-    logger, info("Converting Evahan2026 dataset to Swift format...")
+    print("Converting Evahan2026 dataset to Swift format...")
     convert_to_swift(format="jsonl", use_abs_img_path=True)
 
-    logger, info("Converting Evahan2026 dataset to json array format...")
+    print("Converting Evahan2026 dataset to json array format...")
     convert_to_swift(format="json", use_abs_img_path=True)

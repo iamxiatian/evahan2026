@@ -37,9 +37,15 @@ def extract_layout_regions(llm_text: str) -> list[EvahanRegion]:
 
     for div in soup.find_all("div"):
         # 提取class属性（如果没有则返回空字符串）
-        class_value = div.get("class", [""])[0]  # class返回的是列表，取第一个值
+        class_value = div.get("class")  # class返回的是列表，取第一个值
+        if class_value:
+            class_value = class_value[0]
+        else:
+            logger.warning(f"div元素缺少class属性，跳过该元素：{div}")
+            continue  # 如果没有class属性，跳过该div
+
         # 提取data-bbox属性（如果没有则返回空字符串）
-        data_bbox_value = div.get("data-bbox", "")
+        data_bbox_value: str = str(div.get("data-bbox", ""))
         # 提取div中间的文本内容（去除首尾空白）
         text_content = div.get_text(strip=True)
 

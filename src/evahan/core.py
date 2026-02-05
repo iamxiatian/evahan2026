@@ -12,11 +12,15 @@ class EvahanOcrItem(NamedTuple):
     def relative_image_path(self) -> str:
         return f"{self.image_path.parent.name}/{self.image_path.name}"
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, str]:
         return {
             "image_path": self.relative_image_path,
             "text": self.text,
         }
+
+
+# 地域类型转换为标准Python字典时的类型定义
+REGION_DICT_TYPE = dict[str, str | list[tuple[int, int]]]
 
 
 class EvahanRegion(NamedTuple):
@@ -25,6 +29,13 @@ class EvahanRegion(NamedTuple):
     points: list[
         tuple[int, int]
     ]  # 元素的顶点坐标列表，顺序：左上、右上、右下、左下
+
+    def to_dict(self) -> REGION_DICT_TYPE:
+        return {
+            "label": self.label,
+            "text": self.text,
+            "points": self.points,
+        }
 
 
 class EvahanLayoutItem(NamedTuple):
@@ -35,7 +46,7 @@ class EvahanLayoutItem(NamedTuple):
     def relative_image_path(self) -> str:
         return f"{self.image_path.parent.name}/{self.image_path.name}"
 
-    def to_dict(self) -> dict:
+    def to_dict(self) -> dict[str, str | list[REGION_DICT_TYPE]]:
         return {
             "image_path": self.relative_image_path,
             "regions": [
@@ -47,3 +58,9 @@ class EvahanLayoutItem(NamedTuple):
                 for region in self.regions
             ],
         }
+
+
+class MyException(Exception):
+    """Base exception class."""
+
+    pass

@@ -46,13 +46,13 @@ def query(image_url: str, query: str, system: str | None = None) -> str:
 
 
 def test_ocr():
-    image_path = config.EVAHAN_TRAIN_PATH_A / "a_0001.jpg"
+    image_path = config.EVAHAN_TRAINSET_A / "a_0001.jpg"
     response = query(image_path.as_posix(), config.OCR_USER_QUERY)
     print(response)
 
 
 def test_layout():
-    image_path: Path = config.EVAHAN_TRAIN_PATH_B / "b_0001.jpg"
+    image_path: Path = config.EVAHAN_TRAINSET_B / "b_0001.jpg"
 
     response = query(image_path.as_posix(), config.LAYOUT_USER_QUERY)
     print(response)

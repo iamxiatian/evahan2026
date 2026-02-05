@@ -90,3 +90,13 @@ skip-magic-trailing-comma = false
 # 像 Black 一样，自动检测合适的行尾。
 line-ending = "auto"
 
+# Pyright配置：静态类型检查
+[tool.pyright]
+typeCheckingMode = "strict"  # 严格模式（新手可先设为"basic"）
+reportMissingTypeStubs = "warning"  # 缺失类型 stub 时警告
+reportUnusedVariable = "error"  # 未使用变量报错
+
+[dependency-groups]
+dev = [
+    "pyright>=1.1.408",
+]

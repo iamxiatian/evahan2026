@@ -64,7 +64,7 @@ if __name__ == "__main__":
     # response = client.query(image_path.as_posix(), config.OCR_USER_QUERY)
     # print("OCR:\n", response)
 
-    image_path: Path = config.EVAHAN_TRAIN_PATH_B / "b_0001.jpg"
+    image_path: Path = config.EVAHAN_TRAINSET_B / "b_0001.jpg"
     response = client.query(image_path.as_posix(), config.LAYOUT_USER_QUERY)
     print("Layout Response:\n", response)
     from evahan.extract import extract_layout_regions

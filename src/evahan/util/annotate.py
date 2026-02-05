@@ -13,7 +13,9 @@ color_map: dict[str, tuple[int, int, int]] = {
 }
 
 
-def contrast_color(rgb) -> tuple[int, int, int]:
+def contrast_color(
+    rgb: tuple[float, float, float],
+) -> tuple[float, float, float]:
     """
     考虑多种对比度因素的改进算法, rgb的颜色值是0-1之间的浮点数, 返回值也是0-1之间的浮点数
     """
@@ -26,7 +28,7 @@ def contrast_color(rgb) -> tuple[int, int, int]:
     contrast_with_black = luminance
     contrast_with_white = 1 - luminance
 
-    text_color = (
+    text_color: tuple[float, float, float] = (
         (0, 0, 0) if contrast_with_black > contrast_with_white else (1, 1, 1)
     )
     # 在调用contrast_color前添加
@@ -54,7 +56,7 @@ def draw_element(
     # 创建可绘制对象
     draw = ImageDraw.Draw(image, mode="RGBA")  # 启用alpha通道支持透明度
     # 1. 绘制边框(与PDF的rectangle保持同色同宽)
-    color = color_map[label]
+    color: tuple[int, int, int] = color_map[label]
     draw.polygon(
         [p1, p2, p3, p4],
         outline=color,
@@ -87,7 +89,8 @@ def draw_element(
     )
 
     # 4. 绘制文字(在背景框内居中微调, 避免贴边)
-    text_color = (c / 255.0 for c in color)
+    r, g, b = color
+    text_color = (r / 255.0, g / 255.0, b / 255.0)
     text_color = contrast_color(text_color)
     #  转换为0-255整数供ImageDraw使用
     text_color = tuple(int(c * 255) for c in text_color)
@@ -102,7 +105,7 @@ def draw_element(
 
 
 def visualize_layout(
-    image_path: Path, regions: list[EvahanRegion], save_path: str | Path
+    image_path: Path, regions: list[EvahanRegion], save_path: Path
 ) -> None:
     """在图片上绘制版面元素区域，用于EvaHan2026版面元素的可视化验证。
     Args:

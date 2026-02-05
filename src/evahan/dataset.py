@@ -47,7 +47,7 @@ def load_evahan_layout_dataset(dataset_path: Path) -> list[EvahanLayoutItem]:
 
 def validate() -> None:
     """验证数据集B是否有效: points是否符合要求等。"""
-    ds_b = config.EVAHAN_TRAIN_PATH_B.parent / "Dataset_B.json"
+    ds_b = config.EVAHAN_TRAINSET_B.parent / "Dataset_B.json"
     ds_b_items = load_evahan_layout_dataset(ds_b)
     element_count = 0  # 所有元素的数量
     irregular_count = 0  # 非正规矩形的元素数量
