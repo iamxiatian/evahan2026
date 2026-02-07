@@ -15,8 +15,8 @@ swift sft \
     --save_steps 50 \
     --save_total_limit 5 \
     --logging_steps 5 \
-    --max_length 1024 \
-    --output_dir output \
+    --max_length 8192 \
+    --output_dir output_ocr_v1 \
     --system 'You are a helpful assistant.' \
     --warmup_ratio 0.05 \
     --dataloader_num_workers 4

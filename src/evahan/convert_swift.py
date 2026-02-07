@@ -31,7 +31,7 @@ def __convert_ocr_item(
     """
     img_path: str = item.relative_image_path
     if use_abs_img_path:
-        img_path = item.image_path.as_posix()
+        img_path = item.image_path.resolve().as_posix()
 
     messages: list[dict[str, str]] = [
         {
