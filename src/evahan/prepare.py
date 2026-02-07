@@ -8,11 +8,12 @@ import typer
 from rich import print
 
 from evahan import config
-from evahan.convert_swift import convert_to_swift
+from evahan.convert_swift import convert_to_swift, merge_ocr_jsonl
 from evahan.core import EvahanRegion
 from evahan.dataset import load_evahan_layout_dataset
 from evahan.util.image_rotate import rotate_folder
 from evahan.viz_layout import draw_layout
+from evahan.argument import argument_dataset_ac
 
 
 def __annotate_dataset_b():
@@ -61,10 +62,15 @@ def __prepare_trainset(extract_to: str, trainset_zip_file: str) -> None:
     rotate_folder(dataset_C, dataset_C)  # 原地旋转
     print("Dataset_C 旋转完成")
 
+    # 增强A、C数据集，生成数据集D和E
+    argument_dataset_ac()
+    print("数据集增强完毕")
+
     # 生成swift格式的训练数据
     print("正在生成swift格式的数据...")
     convert_to_swift(format="jsonl", use_abs_img_path=True)
-    convert_to_swift(format="json", use_abs_img_path=True)
+    #convert_to_swift(format="json", use_abs_img_path=True)
+    merge_ocr_jsonl()
 
     print("正在生成数据集B生成可视化版面图...")
     __annotate_dataset_b()

@@ -13,4 +13,7 @@ def list_image_files(folder: Path, recursive: bool = False) -> list[Path]:
     generator = folder.rglob("*") if recursive else folder.glob("*")
     image_extensions = [".png", ".jpg", ".jpeg", ".bmp", ".gif", ".tiff"]
 
-    return [f for f in generator if f.suffix.lower() in image_extensions]
+    files = sorted(
+        [f for f in generator if f.suffix.lower() in image_extensions]
+    )
+    return [f for f in files]

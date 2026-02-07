@@ -467,7 +467,18 @@ class LayoutEvaluator:
             print("WARNING: No boxes were matched!")
 
         # Calculate mAP@[.5:.95]
-        iou_thresholds = [0.5, 0.55, 0.6, 0.65, 0.7, 0.75, 0.8, 0.85, 0.9, 0.95]
+        iou_thresholds = [
+            0.5,
+            0.55,
+            0.6,
+            0.65,
+            0.7,
+            0.75,
+            0.8,
+            0.85,
+            0.9,
+            0.95,
+        ]
         ap_by_threshold = []
 
         print("\nCalculating mAP...")
@@ -480,7 +491,9 @@ class LayoutEvaluator:
                 gt_boxes_by_label.keys()
             ):
                 ap = self.calculate_ap(
-                    pred_boxes_by_label[label], gt_boxes_by_label[label], iou_th
+                    pred_boxes_by_label[label],
+                    gt_boxes_by_label[label],
+                    iou_th,
                 )
                 aps.append(ap)
             ap_by_threshold.append(np.mean(aps) if aps else 0)

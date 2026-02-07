@@ -2,6 +2,10 @@ import argparse
 import json
 import os
 
+import structlog
+
+
+logger = structlog.get_logger(__name__)
 
 # ==========================================
 # Part 1: 公共工具函数 (加载映射表 & DP算法)
@@ -11,14 +15,14 @@ import os
 def load_variant_map(json_path: str) -> dict[str, str]:
     """解析 variant_data.json 构建映射表"""
     if not os.path.exists(json_path):
-        print(f"⚠️  [Variant] 未找到异体字对照表: {json_path}")
+        logger.warning(f" [Variant] 未找到异体字对照表: {json_path}")
         return {}
 
     try:
         with open(json_path, encoding="utf-8") as f:
             data = json.load(f)
     except Exception as e:
-        print(f"❌ [Variant] 读取失败: {e}")
+        logger.error(f" [Variant] 读取失败: {e}")
         return {}
 
     variant_map = {}
@@ -162,8 +166,8 @@ def evaluate_standard(file_path: str):
                 for k in totals:
                     totals[k] += res[k]
                 count += 1
-            except:
-                continue
+            except Exception as e:
+                logger.error(f"Error processing line: {e}")
 
     if count == 0:
         return {"Error": "No Data"}
@@ -210,8 +214,8 @@ def evaluate_variant(file_path: str, variant_map_path: str):
                 for k in totals:
                     totals[k] += res[k]
                 count += 1
-            except:
-                continue
+            except Exception as e:
+                logger.error(f"Error processing line: {e}")
 
     if count == 0:
         return {"Error": "No Data"}

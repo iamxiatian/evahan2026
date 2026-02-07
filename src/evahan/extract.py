@@ -46,9 +46,9 @@ def extract_layout_regions(llm_text: str) -> list[EvahanRegion]:
 
         # 提取data-bbox属性, 由于大模型结果的不可靠，需要滤掉开始和结尾的其他符号
         data_bbox_value: str = str(div.get("data-bbox", ""))
-        p1:int = data_bbox_value.find("[")
-        p2:int = data_bbox_value.rfind("]")
-        data_bbox_value = data_bbox_value[p1: p2+1]
+        p1: int = data_bbox_value.find("[")
+        p2: int = data_bbox_value.rfind("]")
+        data_bbox_value = data_bbox_value[p1 : p2 + 1]
 
         # 提取div中间的文本内容（去除首尾空白）
         text_content = div.get_text(strip=True)

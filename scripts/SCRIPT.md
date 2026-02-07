@@ -63,3 +63,28 @@ nohup swift deploy \
     --max_new_tokens 4096 \
     --served_model_name Qwen2.5-VL-7B-Instruct-LoRA > lora_layout.log &!
 ```
+
+### vLLM显存溢出问题
+
+单卡推理设置以下参数
+
+```bash
+    --vllm_max_num_seqs 1 \
+    --vllm_tensor_parallel_size 1 \ 
+```
+
+完整脚本：
+
+```shell
+CUDA_VISIBLE_DEVICES=3 \
+nohup swift deploy \
+    --model /data/app/workspace/models/Qwen2.5-VL-7B-Instruct \
+    --adapters output_wuwen/v1-20260202-103304/checkpoint-626 \
+    --infer_backend pt \
+    --vllm_gpu_memory_utilization 0.7 \
+    --vllm_max_model_len 8192 \
+    --vllm_max_num_seqs 1 \
+    --vllm_tensor_parallel_size 1 \ 
+    --max_new_tokens 2048 \
+    --served_model_name Qwen2.5-VL-7B-Instruct-LoRA > lora_layout.log &!
+```

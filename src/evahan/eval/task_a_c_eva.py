@@ -114,13 +114,8 @@ def load_json_to_dict(json_path: str) -> dict[str, str]:
     :param json_path: JSON file path (format:[{"image_path": "...", "text": "..."}])
     :return: Image-to-text mapping dictionary
     """
-    try:
-        with open(json_path, encoding="utf-8") as f:
-            data = json.load(f)
-    except FileNotFoundError:
-        raise FileNotFoundError(f"File does not exist:{json_path}")
-    except json.JSONDecodeError:
-        raise ValueError(f"JSON format error:{json_path}")
+    with open(json_path, encoding="utf-8") as f:
+        data = json.load(f)
 
     # Validate Data Format
     if not isinstance(data, list):

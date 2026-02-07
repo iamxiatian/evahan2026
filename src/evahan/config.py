@@ -24,6 +24,12 @@ EVAHAN_TRAINSET_A: Path = EVAHAN_TRAINSET_PATH / "Dataset_A"
 EVAHAN_TRAINSET_B: Path = EVAHAN_TRAINSET_PATH / "Dataset_B"
 EVAHAN_TRAINSET_C: Path = EVAHAN_TRAINSET_PATH / "Dataset_C"
 
+# 由A和C拼接形成的数据集D
+EVAHAN_TRAINSET_D: Path = EVAHAN_TRAINSET_PATH / "Dataset_D"
+# 由C和A拼接形成的数据集E
+EVAHAN_TRAINSET_E: Path = EVAHAN_TRAINSET_PATH / "Dataset_E"
+
+
 # 测试数据集的目录
 EVAHAN_TESTSET_PATH: Path = EVAHAN_DATA_PATH / "test_data"
 
@@ -34,7 +40,7 @@ else:
     logger.error(f"EVAHAN_DATA_PATH: {EVAHAN_DATA_PATH} not exists!")
 
 # OCR的默认提取提示语
-OCR_USER_QUERY = prompt.OCR_USER_QUERY_V1
+OCR_USER_QUERY = prompt.OCR_USER_QUERY_V2
 
 # 版面默认的提示
 LAYOUT_USER_QUERY = prompt.LAYOUT_USER_QUERY_V1

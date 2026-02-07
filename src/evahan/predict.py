@@ -154,7 +154,7 @@ class Predictor:
 
         # 执行预测
         for folder, out_jsonl_file, task_type in zip(
-            folders, jsonl_files, task_types
+            folders, jsonl_files, task_types, strict=True
         ):
             logger.info(f"Evaluate {task_type} task: {folder}")
             self.__predict_folder(
@@ -167,7 +167,7 @@ class Predictor:
         # 转换为评测格式
         logger.info("Convert to evaluation format...")
         for in_jsonl, out_json, task_type in zip(
-            jsonl_files, final_json_files, task_types
+            jsonl_files, final_json_files, task_types, strict=True
         ):
             Predictor.to_evahan_format(in_jsonl, out_json, task_type)
 

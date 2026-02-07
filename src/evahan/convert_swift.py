@@ -3,6 +3,7 @@
 """
 
 import json
+from io import TextIOWrapper
 from typing import Literal
 
 from rich import print
@@ -87,13 +88,33 @@ def __convert_layout_item(
 
 
 def __save(
-    f, items: list[CHAT_INSTANCE_TYPE], format: Literal["json", "jsonl"]
+    f: TextIOWrapper,
+    items: list[CHAT_INSTANCE_TYPE],
+    format: Literal["json", "jsonl"],
 ) -> None:
     if format == "jsonl":
         for item in items:
             f.write(json.dumps(item, ensure_ascii=False) + "\n")
     else:
         json.dump(items, f, ensure_ascii=False, indent=2)
+
+
+def merge_ocr_jsonl() -> None:
+    """将Evahan2026的OCR数据集（A和C）合并为一个jsonl文件，包含了增强后的两个数据集D和E"""
+    base_folder = config.EVAHAN_TRAINSET_PATH
+    src_files = [
+        base_folder / "Swift_A.jsonl",
+        base_folder / "Swift_C.jsonl",
+        base_folder / "Swift_D.jsonl",
+        base_folder / "Swift_E.jsonl",
+    ]
+    dst_file = base_folder / "Swift_OCR.jsonl"
+
+    with open(dst_file, "w", encoding="utf-8") as f:
+        for src_file in src_files:
+            with open(src_file, "r", encoding="utf-8") as src_f:
+                for line in src_f:
+                    f.write(line)
 
 
 def convert_to_swift(format: Literal["json", "jsonl"], use_abs_img_path: bool):
@@ -140,6 +161,18 @@ def convert_to_swift(format: Literal["json", "jsonl"], use_abs_img_path: bool):
     with (base_folder / f"Swift_C.{format}").open("w", encoding="utf-8") as f:
         __save(f, items, format)
 
+    print("Convert Dataset_D to Swift format...")
+    items = load_evahan_ocr_dataset(base_folder / "Dataset_D.json")
+    items = [__convert_ocr_item(item, use_abs_img_path) for item in items]
+    with (base_folder / f"Swift_D.{format}").open("w", encoding="utf-8") as f:
+        __save(f, items, format)
+
+    print("Convert Dataset_E to Swift format...")
+    items = load_evahan_ocr_dataset(base_folder / "Dataset_E.json")
+    items = [__convert_ocr_item(item, use_abs_img_path) for item in items]
+    with (base_folder / f"Swift_E.{format}").open("w", encoding="utf-8") as f:
+        __save(f, items, format)
+
     print("All Done!")
 
 
@@ -149,3 +182,6 @@ if __name__ == "__main__":
 
     print("Converting Evahan2026 dataset to json array format...")
     convert_to_swift(format="json", use_abs_img_path=True)
+
+    print("Merging OCR jsonl files...")
+    merge_ocr_jsonl()

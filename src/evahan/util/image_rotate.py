@@ -16,7 +16,7 @@ supported_extensions = (
 )
 
 
-def rotate_image_file(input_path, output_path):
+def rotate_image_file(input_path: str, output_path: str):
     """Rotate the image 90 degrees clockwise and save"""
     with Image.open(input_path) as img:
         # Rotate clockwise 90 degrees
