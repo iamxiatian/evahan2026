@@ -9,7 +9,8 @@ from pathlib import Path
 from typing import cast
 
 from rich import print
-from swift.llm import InferClient, InferRequest, RequestConfig
+from swift.llm import InferClient, InferRequest, Messages, RequestConfig
+from swift.llm.infer.protocol import ChatCompletionResponse
 
 from evahan import config
 
@@ -25,10 +26,10 @@ class Client:
         image_url: str,
         query: str,
         system: str | None = None,
-        max_tokens=8192,
-        temperature=0,
+        max_tokens: int = 8192,
+        temperature: float = 0,
     ) -> str:
-        messages = [
+        messages: Messages = [
             {
                 "role": "user",
                 "content": f"<image>{query}",
@@ -53,7 +54,10 @@ class Client:
                 ],
             )
         ]
-        resp_list = self.engine.infer(infer_requests, request_config)
+        resp_list = cast(
+            list[ChatCompletionResponse],
+            self.engine.infer(infer_requests, request_config),
+        )
         response: str = cast(str, resp_list[0].choices[0].message.content)
         return response
 
@@ -74,4 +78,4 @@ if __name__ == "__main__":
     print("Layout Regions:\n", regions)
     from evahan.util.annotate import visualize_layout
 
-    visualize_layout(image_path, regions, save_path="./layout_viz.png")
+    visualize_layout(image_path, regions, save_path=Path("./layout_viz.png"))

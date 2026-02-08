@@ -16,4 +16,4 @@ def list_image_files(folder: Path, recursive: bool = False) -> list[Path]:
     files = sorted(
         [f for f in generator if f.suffix.lower() in image_extensions]
     )
-    return [f for f in files]
+    return files

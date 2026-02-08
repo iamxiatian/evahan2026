@@ -8,6 +8,7 @@
 from pathlib import Path
 
 from openai import OpenAI
+from openai.types.chat import ChatCompletion, ChatCompletionMessageParam
 
 from evahan import config
 
@@ -20,8 +21,8 @@ model_type = client.models.list().data[0].id
 print(f"model_type: {model_type}")
 
 
-def query(image_url: str, query: str, system: str | None = None) -> str:
-    messages = [
+def query(image_url: str, query: str, system: str | None = None) -> str | None:
+    messages: list[ChatCompletionMessageParam] = [
         {
             "role": "user",
             "content": [
@@ -38,7 +39,7 @@ def query(image_url: str, query: str, system: str | None = None) -> str:
             {"role": "system", "content": system},
         )
 
-    resp = client.chat.completions.create(
+    resp: ChatCompletion = client.chat.completions.create(
         model=model_type, messages=messages, seed=42
     )
     response = resp.choices[0].message.content
