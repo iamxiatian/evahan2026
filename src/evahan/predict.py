@@ -8,7 +8,7 @@
 
 import json
 from pathlib import Path
-from typing import Literal
+from typing import Literal, cast
 
 import structlog
 from rich.progress import track
@@ -83,6 +83,7 @@ class Predictor:
                     continue
 
                 response = self.client.query(image_path.as_posix(), llm_query)
+                
                 f.write(
                     json.dumps(
                         {
@@ -123,16 +124,29 @@ class Predictor:
                 json.dump(ocr_items, f_out, ensure_ascii=False, indent=2)
             elif task == "layout":
                 # 转换为Layout评测格式
+                scale_factors: dict[str, float] = {} # 读取缩放因子
+                with open(config.EVAHAN_TESTSET_PATH / "Task_B_argument_scale.json", "r", encoding="utf-8") as f:
+                    items = cast(list[dict[str, str|float]], json.load(f))
+                    for item in items:
+                        image_path = str(item["image_path"])
+                        scale_factors[image_path] = float(item["scale_factor"])
+
                 layout_items: list[LAYOUT_ITEM_TYPE] = []
                 for line in f_in:
                     item = json.loads(line)
                     llm_output = str(item["llm_response"])
+
+                    image_name = Path(item["image_path"]).name
+                    # 还原位置
+                    factor = scale_factors[image_name]
                     regions: list[REGION_DICT_TYPE] = [
-                        region.to_dict()
+                        region.to_uncale_dict(factor)
                         for region in extract_layout_regions(llm_output)
                     ]
+
+                    # 转换为最终的测试集路径
                     layout_item: LAYOUT_ITEM_TYPE = {
-                        "image_path": str(item["image_path"]),
+                        "image_path":  f"Task_B/{image_name}",
                         "regions": regions,
                     }
                     layout_items.append(layout_item)
@@ -213,7 +227,7 @@ def run_trainset(
     )
 
 
-def run_testset(
+def run_ocr_testset(
     run_name: str, host: str = "127.0.0.1", port: int = 8000
 ) -> None:
     """对测试集进行预测，并保存结果到run_name指定的文件夹中。
@@ -230,7 +244,6 @@ def run_testset(
 
     test_folders = [
         config.EVAHAN_TESTSET_PATH / "Task_A",
-        # config.EVAHAN_TESTSET_PATH / "Task_B",
         config.EVAHAN_TESTSET_PATH / "Task_C",
     ]
     task_types: list[Literal["ocr", "layout"]] = ["ocr", "ocr"]
@@ -241,15 +254,44 @@ def run_testset(
         resume=True,
     )
 
+    logger.info("All done!")
+
+
+def run_layout_testset(
+    run_name: str, host: str = "127.0.0.1", port: int = 8000
+) -> None:
+    """对版面测试集进行预测，并保存结果到run_name指定的文件夹中。
+
+    Args:
+        run_name (str): 保存结果的文件夹名称
+        host (str): vllm服务的主机地址
+        port (int): vllm服务的端口号
+    """
+    # 初始化需要访问vllm服务的客户端
+    logger.info(f"Connect to Swift server at {host}:{port}")
+    client = Client(host=host, port=port)
+    predictor = Predictor(client)
+
+    test_folders = [
+        config.EVAHAN_TESTSET_PATH / "Task_B_argument"
+    ]
+    task_types: list[Literal["ocr", "layout"]] = ["layout"]
+    predictor.run(
+        test_folders,
+        task_types,
+        run_name,
+        resume=True,
+    )
+
     # 可视化版面的预测结果
-    if "layout" in task_types:
-        logger.info("visualize layout test result.")
-        draw_testset_results(run_name)
+    logger.info("visualize layout test result.")
+    draw_testset_results(run_name)
 
     logger.info("All done!")
+
 
 
 if __name__ == "__main__":
     import typer
 
-    typer.run(run_testset)
+    typer.run(run_ocr_testset)

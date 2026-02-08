@@ -6,7 +6,7 @@ from typing import cast
 import structlog
 from bs4 import BeautifulSoup
 
-from evahan.dataset import EvahanRegion
+from evahan.core import EvahanRegion
 
 
 logger = structlog.get_logger(__name__)

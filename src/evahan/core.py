@@ -37,6 +37,23 @@ class EvahanRegion(NamedTuple):
             "points": self.points,
         }
 
+    def to_uncale_dict(self, scale: float) -> REGION_DICT_TYPE:
+        """还原未缩放的区域字典。
+
+        Args:
+            scale (float): 缩放比例
+
+        Returns:
+            REGION_DICT_TYPE: 未缩放的区域字典
+        """
+        return {
+            "label": self.label,
+            "text": self.text,
+            "points": [
+                (int(x / scale), int(y / scale)) for x, y in self.points
+            ],
+        }
+
 
 class EvahanLayoutItem(NamedTuple):
     image_path: Path  # 图片路径

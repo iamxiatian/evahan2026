@@ -62,11 +62,11 @@ def draw_testset_results(
         run_name (str): 对测试集的一次运行结果的名称。
     """
     base_folder = config.EVAHAN_DATA_PATH / "run_results" / run_name
-    jsonl_file = base_folder / "Task_B.jsonl"
+    json_file = base_folder / "Task_B.json"
     regions_dict: dict[str, list[EvahanRegion]] = {}
-    with jsonl_file.open("r", encoding="utf-8") as f:
-        for line in f:
-            item = json.loads(line)
+    with json_file.open("r", encoding="utf-8") as f:
+        items = json.load(f)
+        for item in items:
             image_path = item["image_path"]
             llm_response = item["llm_response"]
             regions = extract_layout_regions(llm_response)

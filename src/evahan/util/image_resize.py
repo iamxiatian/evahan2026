@@ -24,17 +24,19 @@ class ResizedImage(NamedTuple):
 
 
 class ImageProcessor:
-    def __init__(self, bg_width: int = 924, bg_height: int = 1232):
+    def __init__(self, bg_width: int = 924, bg_height: int = 1232, random_bg:bool=True):
         """
         初始化图片处理器
 
         Args:
             bg_width: 背景图片宽度
             bg_height: 背景图片高度
+            random_bg: 是否随机生成背景
         """
         self.bg_width = bg_width
         self.bg_height = bg_height
         self.bg_size = (bg_width, bg_height)
+        self.random_bg = random_bg
 
     def _generate_random_background(self) -> MatLike:
         """
@@ -45,7 +47,9 @@ class ImageProcessor:
         """
         # 生成200-255之间的随机灰度值（从浅灰到白）
         random.seed(42)
-        if random.random() < 0.7:  # 70%的概率使用浅灰色背景
+        if not self.random_bg:
+            gray_value = 242 # 如不指定随机，默认灰色背景
+        elif random.random() < 0.7:  # 70%的概率使用浅灰色背景
             gray_value = 242
         else:  # 30%的概率随机使用浅灰背景
             gray_value = random.randint(200, 255)

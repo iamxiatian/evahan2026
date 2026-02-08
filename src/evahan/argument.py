@@ -195,8 +195,47 @@ def argument_dataset_b() -> None:
     annotate_dataset_b(name=argument_name)
 
 
+def argument_task_b() -> None:
+    """
+    增强测试集B中的图片，生成新的图片和布局信息，测试时使用新数据，而不再使用原来的测试集B
+    """
+    # 数据集B的增强版本的名称，目录和元数据文件的名称都采用这个名字
+    scale_factors:list[dict[str,str|float]] = [] # 缩放因子列表，每个元素是一个字典，包含缩放因子的文件名称和对应的值
+    argument_name = "Task_B_argument"
+    processor = ImageProcessor(bg_width=924, bg_height=1232, random_bg=False)
+    out_dir = config.EVAHAN_TESTSET_PATH / argument_name
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    raw_images = file_util.list_image_files(config.EVAHAN_TESTSET_PATH / "Task_B")
+    for raw_image in track(raw_images, description="增强测试集B..."):
+        resized_info = processor.process_image(
+            raw_image.as_posix(), random_offset=False
+        )
+        out_file = out_dir / raw_image.name
+        scale_factors.append(
+            {
+                "image_path": raw_image.name,
+                "scale_factor": resized_info.scale,
+            }
+        )
+        cv2.imwrite(out_file.as_posix(), resized_info.whole_image)
+
+    # 保存缩放因子列表
+    out_file = config.EVAHAN_TESTSET_PATH / f"{argument_name}_scale.json"
+    with out_file.open("w", encoding="utf-8") as f:
+        json.dump(
+            scale_factors,
+            f,
+            indent=2,
+            ensure_ascii=False,
+        )
+
+
+
 if __name__ == "__main__":
     # argument_dataset_ac()
     # print("OCR数据集增强完毕")
-    argument_dataset_b()
-    print("数据集B增强完毕")
+    #argument_dataset_b()
+    # print("数据集B增强完毕")
+    argument_task_b()
+    print("任务B增强完毕")
