@@ -10,6 +10,7 @@ from pathlib import Path
 from typing import Literal
 
 from rich.progress import track
+
 from evahan import config
 from evahan.core import EvahanOcrItem
 from evahan.dataset import load_evahan_ocr_dataset

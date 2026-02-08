@@ -15,12 +15,14 @@ from rich.progress import track
 
 from evahan import config
 from evahan.client.swift_client import Client
+from evahan.core import REGION_DICT_TYPE
 from evahan.extract import extract_layout_regions
 from evahan.util import file_util
 from evahan.viz_layout import draw_testset_results
 
 
 logger = structlog.get_logger(__name__)
+LAYOUT_ITEM_TYPE = dict[str, str | list[REGION_DICT_TYPE]]
 
 
 class Predictor:
@@ -108,23 +110,34 @@ class Predictor:
             input_jsonl.open("r", encoding="utf-8") as f_in,
             output_json.open("w", encoding="utf-8") as f_out,
         ):
-            for line in f_in:
-                item = json.loads(line)
-                if task == "ocr":
-                    output_item = {
-                        "image_path": item["image_path"],
-                        "text": item["llm_response"],
+            if task == "ocr":
+                # 转换为OCR评测格式
+                ocr_items: list[dict[str, str]] = []
+                for line in f_in:
+                    item = json.loads(line)
+                    ocr_item: dict[str, str] = {
+                        "image_path": str(item["image_path"]),
+                        "text": str(item["llm_response"]),
                     }
-                elif task == "layout":
-                    llm_output = item["llm_response"]
-                    regions = extract_layout_regions(llm_output)
-                    output_item = {
-                        "image_path": item["image_path"],
-                        "regions": [region.to_dict() for region in regions],
+                    ocr_items.append(ocr_item)
+                json.dump(ocr_items, f_out, ensure_ascii=False, indent=2)
+            elif task == "layout":
+                # 转换为Layout评测格式
+                layout_items: list[LAYOUT_ITEM_TYPE] = []
+                for line in f_in:
+                    item = json.loads(line)
+                    llm_output = str(item["llm_response"])
+                    regions: list[REGION_DICT_TYPE] = [
+                        region.to_dict()
+                        for region in extract_layout_regions(llm_output)
+                    ]
+                    layout_item: LAYOUT_ITEM_TYPE = {
+                        "image_path": str(item["image_path"]),
+                        "regions": regions,
                     }
-                else:
-                    raise ValueError(f"Unknown task: {task}")
-                json.dump(output_item, f_out, ensure_ascii=False, indent=2)
+                    layout_items.append(layout_item)
+                json.dump(layout_items, f_out, ensure_ascii=False, indent=2)
+
         logger.info(
             f"Convert {input_jsonl} to evaluation format: {output_json}"
         )

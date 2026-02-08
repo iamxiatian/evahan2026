@@ -112,7 +112,7 @@ def merge_ocr_jsonl() -> None:
 
     with open(dst_file, "w", encoding="utf-8") as f:
         for src_file in src_files:
-            with open(src_file, "r", encoding="utf-8") as src_f:
+            with open(src_file, encoding="utf-8") as src_f:
                 for line in src_f:
                     f.write(line)
 

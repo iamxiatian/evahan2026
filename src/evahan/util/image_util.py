@@ -1,10 +1,11 @@
+import logging
 from pathlib import Path
 from typing import Literal
 
 import cv2
-from cv2.typing import MatLike
 import numpy as np
-import logging
+from cv2.typing import MatLike
+
 
 logger = logging.getLogger(__name__)
 

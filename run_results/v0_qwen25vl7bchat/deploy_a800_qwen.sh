@@ -1,7 +1,6 @@
 CUDA_VISIBLE_DEVICES=2 \
 swift deploy \
     --model /mnt/public/xiatian/workspace/models/Qwen2.5-VL-7B-Instruct \
-    --adapters output_ocr_v1/v0-backup/checkpoint-7200 \
     --infer_backend vllm \
     --vllm_gpu_memory_utilization 0.9 \
     --vllm_max_model_len 4096 \
@@ -9,4 +8,4 @@ swift deploy \
     --vllm_tensor_parallel_size 1 \
     --max_new_tokens 2048 \
     --port 8000 \
-    --served_model_name Qwen2.5-VL-7B-Instruct-LoRA
+    --served_model_name Qwen2.5-VL-7B-Instruct

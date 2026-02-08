@@ -34,7 +34,7 @@ EVAHAN_TRAINSET_E: Path = EVAHAN_TRAINSET_PATH / "Dataset_E"
 EVAHAN_TESTSET_PATH: Path = EVAHAN_DATA_PATH / "test_data"
 
 # 测试集预测结果目录
-EVAHAN_RUNTEST_PATH: Path = EVAHAN_DATA_PATH / "run_results"
+EVAHAN_RUNTEST_PATH: Path = Path("./run_results")
 
 
 if EVAHAN_DATA_PATH.exists():
