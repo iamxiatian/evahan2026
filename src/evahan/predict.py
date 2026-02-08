@@ -157,7 +157,7 @@ class Predictor:
             run_name (str): 保存结果的文件夹名称
             resume (bool, optional): 是否从已有的预测结果中断点继续.
         """
-        run_result_folder = config.EVAHAN_DATA_PATH / "run_results" / run_name
+        run_result_folder = config.EVAHAN_RUNTEST_PATH / run_name
         run_result_folder.mkdir(parents=True, exist_ok=True)
         jsonl_files: list[Path] = []
         final_json_files: list[Path] = []
@@ -183,8 +183,6 @@ class Predictor:
             jsonl_files, final_json_files, task_types, strict=True
         ):
             Predictor.to_evahan_format(in_jsonl, out_json, task_type)
-
-        logger.info("All done!")
 
 
 def run_trainset(
@@ -244,9 +242,11 @@ def run_testset(
     )
 
     # 可视化版面的预测结果
-    logger.info("visualize layout test result.")
     if "layout" in task_types:
+        logger.info("visualize layout test result.")
         draw_testset_results(run_name)
+
+    logger.info("All done!")
 
 
 if __name__ == "__main__":

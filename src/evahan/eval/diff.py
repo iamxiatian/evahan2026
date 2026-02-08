@@ -20,7 +20,7 @@ def load_ocr_items(
     Returns:
         包含两次OCR预测结果的元组，每个元素是一个字典列表，字典包含图片文件名和OCR结果文本
     """
-    run_path: Path = config.EVAHAN_DATA_PATH / "run_results" / run_name
+    run_path: Path = config.EVAHAN_RUNTEST_PATH / run_name
 
     with open(run_path / "Task_A.json") as f:
         data = json.load(f)
@@ -77,7 +77,7 @@ def compare_ocr_items(
 
 if __name__ == "__main__":
     compare_ocr_items(
-        run_name1="v0_qwen25vl7bchat",
-        run_name2="v1_lora_a800_5850",
-        out_json_file=config.EVAHAN_RUNTEST_PATH / "diff_v0_v1.json",
+        run_name1="v0_qwen25vl7bunsft",
+        run_name2="v3_lora_a800_09000",
+        out_json_file=config.EVAHAN_RUNTEST_PATH / "diff_v0_v3.json",
     )

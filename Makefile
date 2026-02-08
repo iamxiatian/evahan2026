@@ -15,6 +15,9 @@ lint:      ## 代码检查
 fmt:       ## 格式化
 	uv run ruff format src/
 
+diff:      ## 对比OCR不同预测结果的差异
+	uv run -m evahan.eval.diff
+
 build:     ## 构建 wheel
 	uv build
 

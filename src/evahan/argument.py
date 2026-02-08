@@ -17,7 +17,7 @@ from evahan.dataset import load_evahan_ocr_dataset
 from evahan.util import file_util, image_util
 
 
-def __argument_dataset(
+def __argument_ocr_dataset(
     image_files_a: list[Path],
     image_files_c: list[Path],
     ocr_dict: dict[str, str],
@@ -95,10 +95,10 @@ def argument_dataset_ac():
     # 字典的主键是图片的文件名称name，值是OCR的结果文本
     ocr_dict = {item.image_path.name: item.text for item in items_a + items_c}
 
-    __argument_dataset(image_files_a, image_files_c, ocr_dict, "D")
-    __argument_dataset(image_files_a, image_files_c, ocr_dict, "E")
+    __argument_ocr_dataset(image_files_a, image_files_c, ocr_dict, "D")
+    __argument_ocr_dataset(image_files_a, image_files_c, ocr_dict, "E")
 
 
 if __name__ == "__main__":
     argument_dataset_ac()
-    print("数据集增强完毕")
+    print("OCR数据集增强完毕")

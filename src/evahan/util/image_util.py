@@ -1,3 +1,8 @@
+"""图片处理工具。其中的merge_file_vertically函数用于将两张图片垂直合并，用于合并OCR数据集A和C中的图片，
+合并后的图片宽度取两张图片中宽度较大的那一个。
+
+"""
+
 import logging
 from pathlib import Path
 from typing import Literal
@@ -149,6 +154,18 @@ def merge_file_vertically(
     # 3. 保存结果
     cv2.imwrite(output_path.as_posix(), merged_img)
     logger.debug(f"图片合并完成，保存至：{output_path}")
+
+
+def get_image_size(img_path: Path) -> tuple[int, int]:
+    """
+    获取图片的宽度和高度
+    Args:
+        img_path: 图片路径
+    Returns:
+        tuple[int, int]: 图片的宽度和高度
+    """
+    img = cv2.imread(img_path.as_posix())
+    return img.shape[1], img.shape[0]
 
 
 def main():
