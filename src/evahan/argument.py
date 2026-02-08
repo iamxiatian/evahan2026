@@ -9,12 +9,18 @@ import json
 from pathlib import Path
 from typing import Literal
 
+import cv2
 from rich.progress import track
 
 from evahan import config
-from evahan.core import EvahanOcrItem
-from evahan.dataset import load_evahan_ocr_dataset
+from evahan.core import EvahanLayoutItem, EvahanOcrItem, EvahanRegion
+from evahan.dataset import (
+    load_evahan_layout_dataset,
+    load_evahan_ocr_dataset,
+    annotate_dataset_b,
+)
 from evahan.util import file_util, image_util
+from evahan.util.image_resize import ImageProcessor, ResizedImage
 
 
 def __argument_ocr_dataset(
@@ -99,6 +105,98 @@ def argument_dataset_ac():
     __argument_ocr_dataset(image_files_a, image_files_c, ocr_dict, "E")
 
 
+def _adjust_regions(
+    regions: list[EvahanRegion], resized_info: ResizedImage
+) -> list[EvahanRegion]:
+    """
+    调整区域坐标以适应缩放后的图片
+
+    Args:
+        regions: 原始区域列表
+        resized_info: 缩放后的图片信息
+
+    Returns:
+        调整后的区域列表
+    """
+    return [
+        EvahanRegion(
+            label=r.label,
+            text=r.text,
+            points=[
+                (
+                    int(p[0] * resized_info.scale + resized_info.x1),
+                    int(p[1] * resized_info.scale + resized_info.y1),
+                )
+                for p in r.points
+            ],
+        )
+        for r in regions
+    ]
+
+
+def argument_dataset_b() -> None:
+    """
+    增强训练集B中的图片，生成新的图片和布局信息，训练时使用新数据，而不再使用原来的训练集B
+    """
+
+    # 数据集B的增强版本的名称，目录和元数据文件的名称都采用这个名字
+    argument_name = "Dataset_B_argument"
+    processor = ImageProcessor(bg_width=924, bg_height=1232)
+    out_dir = config.EVAHAN_TRAINSET_PATH / argument_name
+    out_dir.mkdir(parents=True, exist_ok=True)
+
+    resized_items: list[EvahanLayoutItem] = []
+    raw_items = load_evahan_layout_dataset(
+        config.EVAHAN_TRAINSET_PATH / "Dataset_B.json"
+    )
+    for raw_item in track(raw_items, description="增强数据集B..."):
+        image_path = raw_item.image_path
+        # print(f"处理图片: {image_path}")
+
+        resized_info = processor.process_image(
+            image_path.as_posix(), random_offset=False
+        )
+        out_file = out_dir / f"{image_path.stem}_argument_1.jpg"
+        cv2.imwrite(out_file.as_posix(), resized_info.whole_image)
+
+        resized_items.append(
+            EvahanLayoutItem(
+                image_path=out_file,
+                regions=_adjust_regions(raw_item.regions, resized_info),
+            )
+        )
+
+        # 随机移动偏移位置，再生成一张图片
+        resized_info = processor.process_image(
+            image_path.as_posix(), random_offset=True
+        )
+        out_file = out_dir / f"{image_path.stem}_argument_2.jpg"
+        if resized_info.x1 > 0 or resized_info.y1 > 0:
+            cv2.imwrite(out_file.as_posix(), resized_info.whole_image)
+
+            resized_items.append(
+                EvahanLayoutItem(
+                    image_path=out_file,
+                    regions=_adjust_regions(raw_item.regions, resized_info),
+                )
+            )
+
+    # 保存处理后的布局信息
+    out_file = config.EVAHAN_TRAINSET_PATH / f"{argument_name}.json"
+    with out_file.open("w", encoding="utf-8") as f:
+        json.dump(
+            [item.to_dict() for item in resized_items],
+            f,
+            indent=2,
+            ensure_ascii=False,
+        )
+
+    # 可视化布局图
+    annotate_dataset_b(name=argument_name)
+
+
 if __name__ == "__main__":
-    argument_dataset_ac()
-    print("OCR数据集增强完毕")
+    # argument_dataset_ac()
+    # print("OCR数据集增强完毕")
+    argument_dataset_b()
+    print("数据集B增强完毕")

@@ -6,13 +6,12 @@
 如果图片的长或宽超过了924、1232，则将原始图片缩放一定比例，使其能够放入到背景上，并略有空余，继续按上面的方式处理，得到两张新图片。
 """
 
+import random
+from typing import NamedTuple
+
 import cv2
 import numpy as np
-import random
-import os
-from pathlib import Path
-from typing import Tuple, Optional, Dict, NamedTuple
-import json
+from cv2.typing import MatLike
 
 
 class ResizedImage(NamedTuple):
@@ -21,7 +20,7 @@ class ResizedImage(NamedTuple):
     proc_w: int  # 粘贴在背景图上的图片的宽度
     proc_h: int  # 粘贴在背景图上的图片的高度
     scale: float  # 图片的缩放比例
-    whole_image: np.ndarray  # 连同背景在一起的整个图片
+    whole_image: MatLike  # 连同背景在一起的整个图片
 
 
 class ImageProcessor:
@@ -37,7 +36,7 @@ class ImageProcessor:
         self.bg_height = bg_height
         self.bg_size = (bg_width, bg_height)
 
-    def _generate_random_background(self) -> np.ndarray:
+    def _generate_random_background(self) -> MatLike:
         """
         生成白色到灰色之间的随机背景
 
@@ -45,7 +44,12 @@ class ImageProcessor:
             随机颜色的背景图片
         """
         # 生成200-255之间的随机灰度值（从浅灰到白）
-        gray_value = random.randint(200, 255)
+        random.seed(42)
+        if random.random() < 0.7:  # 70%的概率使用浅灰色背景
+            gray_value = 242
+        else:  # 30%的概率随机使用浅灰背景
+            gray_value = random.randint(200, 255)
+
         background = np.full(
             (self.bg_height, self.bg_width, 3),
             (gray_value, gray_value, gray_value),
@@ -54,8 +58,8 @@ class ImageProcessor:
         return background
 
     def _resize_if_needed(
-        self, image: np.ndarray, margin: int = 20
-    ) -> Tuple[np.ndarray, float]:
+        self, image: MatLike, margin: int = 20
+    ) -> tuple[MatLike, float]:
         """
         如果需要，缩放图片使其能放入背景
 
@@ -90,7 +94,7 @@ class ImageProcessor:
 
     def _calculate_max_offset(
         self, img_width: int, img_height: int
-    ) -> Tuple[int, int]:
+    ) -> tuple[int, int]:
         """
         计算最大可偏移量
 
@@ -109,44 +113,25 @@ class ImageProcessor:
         self,
         image_path: str,
         random_offset: bool,
-        output_dir: str = "processed_images",
-    ) -> Dict:
+    ) -> ResizedImage:
         """
         处理单张图片
 
         Args:
             image_path: 输入图片路径
             random_offset: 是否使用随机偏移,False表示从左上角（0，0）位置开始
-            output_dir: 输出目录
-
         Returns:
-            包含处理信息的字典
+            处理后的图片信息
         """
-        # 创建输出目录
-        Path(output_dir).mkdir(exist_ok=True)
-
         # 读取图片
         image = cv2.imread(image_path)
 
         # 转换颜色空间（OpenCV默认BGR转RGB）
-        image_rgb = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-
-        # 获取原始尺寸
-        orig_h, orig_w = image_rgb.shape[:2]
+        image_rgb: MatLike = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
 
         # 缩放图片（如果需要）
         processed_image, scale = self._resize_if_needed(image_rgb)
         proc_h, proc_w = processed_image.shape[:2]
-
-        # 准备结果信息
-        base_name = Path(image_path).stem
-        result_info = {
-            "original_size": (orig_w, orig_h),
-            "processed_size": (proc_w, proc_h),
-            "scale_factor": scale,
-            "background_size": self.bg_size,
-            "images": [],
-        }
 
         # 生成随机背景
         background = self._generate_random_background()
@@ -186,61 +171,14 @@ class ImageProcessor:
             whole_image=result_bgr,
         )
 
-    def process_folder(
-        self, input_dir: str, output_dir: str = "processed_images"
-    ) -> Dict:
-        """
-        处理整个文件夹中的图片
-
-        Args:
-            input_dir: 输入文件夹路径
-            output_dir: 输出文件夹路径
-
-        Returns:
-            所有图片的处理信息
-        """
-        input_path = Path(input_dir)
-        all_results = {}
-
-        # 支持的图片格式
-        image_extensions = {
-            ".jpg",
-            ".jpeg",
-            ".png",
-            ".bmp",
-            ".tiff",
-            ".tif",
-            ".webp",
-        }
-
-        # 遍历所有图片文件
-        for image_file in input_path.iterdir():
-            if image_file.suffix.lower() in image_extensions:
-                print(f"处理图片: {image_file.name}")
-                try:
-                    result = self.process_image(str(image_file), output_dir)
-                    all_results[image_file.name] = result
-                except Exception as e:
-                    print(f"处理图片 {image_file.name} 时出错: {str(e)}")
-
-        # 保存处理信息到JSON文件
-        info_path = os.path.join(output_dir, "processing_info.json")
-        with open(info_path, "w", encoding="utf-8") as f:
-            json.dump(all_results, f, indent=2, ensure_ascii=False)
-
-        print(f"\n所有图片处理完成！处理信息已保存到: {info_path}")
-        return all_results
-
 
 def main():
     # 创建处理器实例
-    processor = ImageProcessor(bg_width=924, bg_height=1232)
+    # processor = ImageProcessor(bg_width=924, bg_height=1232)
 
     # 使用示例1：处理单张图片
     # result = processor.process_image("input.jpg", "processed_images")
-
-    # 使用示例2：处理整个文件夹
-    processor.process_folder("input_images", "processed_images")
+    pass
 
 
 if __name__ == "__main__":

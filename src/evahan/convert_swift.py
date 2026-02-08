@@ -142,7 +142,7 @@ def convert_to_swift(format: Literal["json", "jsonl"], use_abs_img_path: bool):
         use_abs_img_path (bool): 是否使用绝对路径
     """
 
-    base_folder = config.EVAHAN_TRAINSET_A.parent  # 原始训练集所在的父目录
+    base_folder = config.EVAHAN_TRAINSET_PATH  # 原始训练集所在的主目录
     print("Convert Dataset_A to Swift format...")
     items = load_evahan_ocr_dataset(base_folder / "Dataset_A.json")
     items = [__convert_ocr_item(item, use_abs_img_path) for item in items]
@@ -153,6 +153,14 @@ def convert_to_swift(format: Literal["json", "jsonl"], use_abs_img_path: bool):
     items = load_evahan_layout_dataset(base_folder / "Dataset_B.json")
     items = [__convert_layout_item(item, use_abs_img_path) for item in items]
     with (base_folder / f"Swift_B.{format}").open("w", encoding="utf-8") as f:
+        __save(f, items, format)
+
+    print("Convert Dataset_B_argument to Swift format...")
+    items = load_evahan_layout_dataset(base_folder / "Dataset_B_argument.json")
+    items = [__convert_layout_item(item, use_abs_img_path) for item in items]
+    with (base_folder / f"Swift_B_argument.{format}").open(
+        "w", encoding="utf-8"
+    ) as f:
         __save(f, items, format)
 
     print("Convert Dataset_C to Swift format...")
@@ -185,3 +193,10 @@ if __name__ == "__main__":
 
     print("Merging OCR jsonl files...")
     merge_ocr_jsonl()
+    # base_folder = config.EVAHAN_TRAINSET_PATH  # 原始训练集所在的父目录
+    # format = "jsonl"
+    # print("Convert Dataset_B_argument to Swift format...")
+    # items = load_evahan_layout_dataset(base_folder / "Dataset_B_argument.json")
+    # items = [__convert_layout_item(item, True) for item in items]
+    # with (base_folder / f"Swift_B_argument.{format}").open("w", encoding="utf-8") as f:
+    #     __save(f, items, format)

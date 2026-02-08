@@ -7,39 +7,10 @@ from pathlib import Path
 import typer
 from rich import print
 
-from evahan import config
-from evahan.argument import argument_dataset_ac
+from evahan.argument import argument_dataset_ac, argument_dataset_b
 from evahan.convert_swift import convert_to_swift, merge_ocr_jsonl
-from evahan.core import EvahanRegion
-from evahan.dataset import load_evahan_layout_dataset
+from evahan.dataset import annotate_dataset_b
 from evahan.util.image_rotate import rotate_folder
-from evahan.viz_layout import draw_layout
-
-
-def __annotate_dataset_b():
-    """为数据集B生成可视化版面图像，方便查看标注是否正确"""
-
-    base_folder = config.EVAHAN_TRAINSET_PATH
-    json_file = base_folder / "Dataset_B.json"
-    image_folder = base_folder / "Dataset_B"
-    save_folder = base_folder / "Dataset_B_annotated"
-
-    if save_folder.exists():
-        print(f"目录 {save_folder} 已存在，跳过可视化生成")
-        return
-
-    layout_items = load_evahan_layout_dataset(json_file)
-    layout_dict: dict[str, list[EvahanRegion]] = {
-        item.relative_image_path: item.regions for item in layout_items
-    }
-
-    draw_layout(
-        image_folder=image_folder,
-        save_folder=save_folder,
-        layout_dict=layout_dict,
-    )
-
-    print(f"可视化版面图像已保存到 {save_folder}")
 
 
 def __extract_zip(zip_file: str, extract_to: str):
@@ -64,6 +35,7 @@ def __prepare_trainset(extract_to: str, trainset_zip_file: str) -> None:
 
     # 增强A、C数据集，生成数据集D和E
     argument_dataset_ac()
+    argument_dataset_b()
     print("数据集增强完毕")
 
     # 生成swift格式的训练数据
@@ -73,7 +45,7 @@ def __prepare_trainset(extract_to: str, trainset_zip_file: str) -> None:
     merge_ocr_jsonl()
 
     print("正在生成数据集B生成可视化版面图...")
-    __annotate_dataset_b()
+    annotate_dataset_b(name="Dataset_B")
 
 
 def __prepare_testset(extract_to: str, testset_zip_file: str) -> None:

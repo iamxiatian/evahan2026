@@ -1,9 +1,10 @@
 """如果目录下生成了满足条件的文件夹，就执行备份"""
 
-from pathlib import Path
 import shutil
 import time
 from datetime import datetime
+from pathlib import Path
+
 
 processed: dict[str, str] = {}
 
@@ -42,7 +43,7 @@ def watch_dir(dir_path: Path) -> None:
                 print(f"发现需要处理的新文件夹：{item.name}")
                 processed[item.name] = str(datetime.now())
                 time.sleep(10)
-                shutil.move(item, f"output_ocr_v1/v0-backup/")
+                shutil.move(item, "output_ocr_v1/v0-backup/")
                 print(
                     f"备份完成：{item.name} -> output_ocr_v1/v0-backup/{item.name}"
                 )
