@@ -36,6 +36,10 @@ uv run -m evahan.prepare /path/to/evahan2026.zip /path/to/TestSet.zip
 
 图片转灰度图和黑白，上下拼接，形成数据集D和E两个目录。
 
+数据集B的图像，统一缩放到924 X 1232大小。让数据缩放后贴到一张大小为924 X 1232大小的背景上。
+
+
+
 ### 模型参数
 
 LoRA 参数：

@@ -10,6 +10,10 @@ from typing import Literal
 import cv2
 import numpy as np
 from cv2.typing import MatLike
+from rich.progress import track
+
+from evahan import config
+from evahan.util.file_util import list_image_files
 
 
 logger = logging.getLogger(__name__)
@@ -168,16 +172,53 @@ def get_image_size(img_path: Path) -> tuple[int, int]:
     return img.shape[1], img.shape[0]
 
 
+def get_max_image_size(img_paths: list[Path]) -> tuple[int, int]:
+    """
+    获取图片列表中最大的宽度和高度
+    Args:
+        img_paths: 图片路径列表
+    Returns:
+        tuple[int, int]: 图片列表中最大的宽度和高度
+    """
+    # 记录不同尺寸宽度和高度的图片数量
+    width_count: dict[int, int] = {}
+    height_count: dict[int, int] = {}
+
+    max_width = 0
+    max_height = 0
+    for img_path in track(img_paths, description="获取最大图片尺寸"):
+        width, height = get_image_size(img_path)
+        width_count[width] = width_count.get(width, 0) + 1
+        height_count[height] = height_count.get(height, 0) + 1
+        max_width = max(max_width, width)
+        max_height = max(max_height, height)
+
+    # 打印不同尺寸宽度和高度的图片数量
+    print("不同尺寸宽度的图片数量：")
+    for width, count in width_count.items():
+        print(f"宽度 {width}：{count} 张")
+
+    print("\n不同尺寸高度的图片数量：")
+    for height, count in height_count.items():
+        print(f"高度 {height}：{count} 张")
+
+    return max_width, max_height
+
+
 def main():
     """测试"""
-    from evahan import config
+    # merge_file_vertically(
+    #     config.EVAHAN_TRAINSET_A / "a_0001.jpg",
+    #     config.EVAHAN_TRAINSET_C / "c_0001.jpg",
+    #     Path("merged.jpg"),
+    #     True,
+    # )
+    # images: list[Path] = list_image_files(config.EVAHAN_TRAINSET_B)
 
-    merge_file_vertically(
-        config.EVAHAN_TRAINSET_A / "a_0001.jpg",
-        config.EVAHAN_TRAINSET_C / "c_0001.jpg",
-        Path("merged.jpg"),
-        True,
-    )
+    images = list_image_files(config.EVAHAN_TESTSET_PATH / "Task_B")
+
+    h, w = get_max_image_size(images)
+    print(f"最大图片尺寸：{w}x{h}")
 
 
 if __name__ == "__main__":
