@@ -69,7 +69,7 @@ def __prepare_trainset(extract_to: str, trainset_zip_file: str) -> None:
     # 生成swift格式的训练数据
     print("正在生成swift格式的数据...")
     convert_to_swift(format="jsonl", use_abs_img_path=True)
-    #convert_to_swift(format="json", use_abs_img_path=True)
+    # convert_to_swift(format="json", use_abs_img_path=True)
     merge_ocr_jsonl()
 
     print("正在生成数据集B生成可视化版面图...")

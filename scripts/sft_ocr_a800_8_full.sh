@@ -1,22 +1,23 @@
 swift sft \
     --model /mnt/public/xiatian/workspace/models/Qwen2.5-VL-7B-Instruct \
     --dataset /mnt/public/xiatian/workspace/evahan2026/dataset/train_data/Swift_OCR.jsonl \
-    --train_type lora \
+    --split_dataset_ratio 0.01 \
+    --train_type full \
     --torch_dtype bfloat16 \
+    --attn_impl flash_attn \
     --num_train_epochs 8 \
-    --per_device_train_batch_size 8 \
-    --per_device_eval_batch_size 4 \
+    --per_device_train_batch_size 4 \
     --learning_rate 2e-5 \
-    --lora_rank 8 \
-    --lora_alpha 32 \
     --target_modules all-linear \
     --freeze_vit true \
+    --freeze_llm false \
+    --freeze_aligner false \
     --gradient_accumulation_steps 16 \
-    --eval_steps 50 \
+    --eval_steps -1 \
     --save_steps 50 \
     --save_total_limit 5 \
     --logging_steps 5 \
-    --max_length 16384 \
+    --max_length 8192 \
     --output_dir output_ocr_v1 \
     --system 'You are a helpful assistant.' \
     --warmup_ratio 0.05 \

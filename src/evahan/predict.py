@@ -219,10 +219,10 @@ def run_testset(
 
     test_folders = [
         config.EVAHAN_TESTSET_PATH / "Task_A",
-        config.EVAHAN_TESTSET_PATH / "Task_B",
+        # config.EVAHAN_TESTSET_PATH / "Task_B",
         config.EVAHAN_TESTSET_PATH / "Task_C",
     ]
-    task_types: list[Literal["ocr", "layout"]] = ["ocr", "layout", "ocr"]
+    task_types: list[Literal["ocr", "layout"]] = ["ocr", "ocr"]
     predictor.run(
         test_folders,
         task_types,
@@ -232,7 +232,8 @@ def run_testset(
 
     # 可视化版面的预测结果
     logger.info("visualize layout test result.")
-    draw_testset_results(run_name)
+    if "layout" in task_types:
+        draw_testset_results(run_name)
 
 
 if __name__ == "__main__":
