@@ -1,7 +1,8 @@
-export NPROC_PER_NODE=8
-export CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7
-export SWIFT_PATCH_CONV3D=1
-#export MASTER_PORT=29500
+SWIFT_PATCH_CONV3D=1 \
+OMP_NUM_THREADS=1 \
+NPROC_PER_NODE=8 \
+MAX_PIXELS=1003520 \
+CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 \
 swift sft \
     --model /mnt/public/xiatian/workspace/models/Qwen2.5-VL-7B-Instruct \
     --dataset /mnt/public/xiatian/workspace/evahan2026/dataset/train_data/Swift_B_argument.jsonl \
@@ -20,11 +21,11 @@ swift sft \
     --freeze_aligner false \
     --gradient_accumulation_steps 4 \
     --eval_steps -1 \
-    --save_steps 100 \
+    --save_steps 50 \
     --logging_steps 5 \
     --max_length 8192 \
-    --output_dir output_layout_v2 \
+    --output_dir output_layout_v3 \
     --system 'You are a helpful assistant.' \
     --warmup_ratio 0.05 \
-    --dataloader_num_workers 16 \
-    --dataloader_prefetch_factor 16
+    --dataloader_num_workers 4 \
+    --dataloader_prefetch_factor 4
