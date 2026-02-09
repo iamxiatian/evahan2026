@@ -232,5 +232,5 @@ def run_layout_testset(
 if __name__ == "__main__":
     import typer
 
-    # typer.run(run_layout_testset)
-    typer.run(annotate_argument_testset)
+    typer.run(run_layout_testset)
+    #typer.run(annotate_argument_testset)
