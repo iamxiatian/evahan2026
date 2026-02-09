@@ -9,7 +9,7 @@ from rich import print
 
 from evahan.argument import argument_dataset_ac, argument_dataset_b
 from evahan.convert_swift import convert_to_swift, merge_ocr_jsonl
-from evahan.dataset import annotate_dataset_b
+from evahan.viz_layout import annotate_dataset_b
 from evahan.util.image_rotate import rotate_folder
 
 

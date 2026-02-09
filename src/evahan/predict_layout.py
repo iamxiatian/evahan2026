@@ -8,7 +8,7 @@
 
 import json
 from pathlib import Path
-from typing import Literal, cast
+from typing import cast
 
 import structlog
 from rich.progress import track
@@ -46,7 +46,6 @@ class Predictor:
         self,
         image_folder: Path,
         out_jsonl: Path,
-        task_type: Literal["ocr", "layout"],
         resume: bool = True,
     ) -> None:
         """
@@ -56,7 +55,6 @@ class Predictor:
         Args:
             image_folder (Path): 图片文件夹路径
             out_jsonl_file (Path): 保存到的jsonline文件名称
-            task_type (Literal["ocr","layout"]): 任务类型，ocr或layout
             resume(bool): 是否从已有的out_jsonl_file中断点继续
         """
         # 读取已预测的图片，避免重复预测, 主键为image_path，值为整行json字符串
@@ -64,11 +62,7 @@ class Predictor:
         if resume and out_jsonl.exists():
             predicated_images = Predictor.__read_predicted(out_jsonl)
 
-        llm_query = (
-            config.OCR_USER_QUERY
-            if task_type == "ocr"
-            else config.LAYOUT_USER_QUERY
-        )
+        llm_query = config.LAYOUT_USER_QUERY
         image_files: list[Path] = file_util.list_image_files(image_folder)
 
         with out_jsonl.open("w", encoding="utf-8") as f:
@@ -99,58 +93,45 @@ class Predictor:
 
     @staticmethod
     def to_evahan_format(
-        input_jsonl: Path, output_json: Path, task: Literal["ocr", "layout"]
+        input_jsonl: Path, output_json: Path
     ):
         """将VLLM的预测保存结果，转换为评测所需的格式。之所以分为两步，是为了先记录VLLM的输出，方便后续分析。
         Args:
             input_jsonl (Path): 输入的预测结果jsonline文件
             output_json (Path): 输出的评测格式json文件
-            task (Literal["ocr","layout"]): 任务类型，ocr或layout
         """
         with (
             input_jsonl.open("r", encoding="utf-8") as f_in,
             output_json.open("w", encoding="utf-8") as f_out,
         ):
-            if task == "ocr":
-                # 转换为OCR评测格式
-                ocr_items: list[dict[str, str]] = []
-                for line in f_in:
-                    item = json.loads(line)
-                    ocr_item: dict[str, str] = {
-                        "image_path": str(item["image_path"]),
-                        "text": str(item["llm_response"]),
-                    }
-                    ocr_items.append(ocr_item)
-                json.dump(ocr_items, f_out, ensure_ascii=False, indent=2)
-            elif task == "layout":
-                # 转换为Layout评测格式
-                scale_factors: dict[str, float] = {} # 读取缩放因子
-                with open(config.EVAHAN_TESTSET_PATH / "Task_B_argument_scale.json", "r", encoding="utf-8") as f:
-                    items = cast(list[dict[str, str|float]], json.load(f))
-                    for item in items:
-                        image_path = str(item["image_path"])
-                        scale_factors[image_path] = float(item["scale_factor"])
+            # 转换为Layout评测格式
+            scale_factors: dict[str, float] = {} # 读取缩放因子
+            with open(config.EVAHAN_TESTSET_PATH / "Task_B_argument_scale.json", "r", encoding="utf-8") as f:
+                items = cast(list[dict[str, str|float]], json.load(f))
+                for item in items:
+                    image_path = str(item["image_path"])
+                    scale_factors[image_path] = float(item["scale_factor"])
 
-                layout_items: list[LAYOUT_ITEM_TYPE] = []
-                for line in f_in:
-                    item = json.loads(line)
-                    llm_output = str(item["llm_response"])
+            layout_items: list[LAYOUT_ITEM_TYPE] = []
+            for line in f_in:
+                item = json.loads(line)
+                llm_output = str(item["llm_response"])
 
-                    image_name = Path(item["image_path"]).name
-                    # 还原位置
-                    factor = scale_factors[image_name]
-                    regions: list[REGION_DICT_TYPE] = [
-                        region.to_uncale_dict(factor)
-                        for region in extract_layout_regions(llm_output)
-                    ]
+                image_name = Path(item["image_path"]).name
+                # 还原位置
+                factor = scale_factors[image_name]
+                regions: list[REGION_DICT_TYPE] = [
+                    region.to_uncale_dict(factor)
+                    for region in extract_layout_regions(llm_output)
+                ]
 
-                    # 转换为最终的测试集路径
-                    layout_item: LAYOUT_ITEM_TYPE = {
-                        "image_path":  f"Task_B/{image_name}",
-                        "regions": regions,
-                    }
-                    layout_items.append(layout_item)
-                json.dump(layout_items, f_out, ensure_ascii=False, indent=2)
+                # 转换为最终的测试集路径
+                layout_item: LAYOUT_ITEM_TYPE = {
+                    "image_path":  f"Task_B/{image_name}",
+                    "regions": regions,
+                }
+                layout_items.append(layout_item)
+            json.dump(layout_items, f_out, ensure_ascii=False, indent=2)
 
         logger.info(
             f"Convert {input_jsonl} to evaluation format: {output_json}"
@@ -158,12 +139,11 @@ class Predictor:
 
     def run(
         self,
-        folders: list[Path],
-        task_types: list[Literal["ocr", "layout"]],
+        folder: Path,
         run_name: str,
         resume: bool = True,
     ) -> None:
-        """执行预测，对folders中的每一个文件夹按照任务类型(task_types)，进行预测，并保存结果到run_name指定的文件夹中。
+        """执行预测，对folders中的每一个文件夹，进行预测，并保存结果到run_name指定的文件夹中。
 
         Args:
             folders (list[Path]): 需要预测的文件夹列表
@@ -173,88 +153,20 @@ class Predictor:
         """
         run_result_folder = config.EVAHAN_RUNTEST_PATH / run_name
         run_result_folder.mkdir(parents=True, exist_ok=True)
-        jsonl_files: list[Path] = []
-        final_json_files: list[Path] = []
-        for folder in folders:
-            jsonl_files.append(run_result_folder / f"{folder.name}.jsonl")
-            final_json_files.append(run_result_folder / f"{folder.name}.json")
-
-        # 执行预测
-        for folder, out_jsonl_file, task_type in zip(
-            folders, jsonl_files, task_types, strict=True
-        ):
-            logger.info(f"Evaluate {task_type} task: {folder}")
-            self.__predict_folder(
-                folder,
-                out_jsonl_file,
-                task_type,
-                resume=resume,
-            )
+        jsonl_file: Path = run_result_folder / "Task_B.jsonl"
+        json_file: Path = run_result_folder / "Task_B.json"
+        
+        logger.info(f"Evaluate layout task: {folder}")
+        # self.__predict_folder(
+        #     folder,
+        #     jsonl_file,
+        #     resume=resume,
+        # )
 
         # 转换为评测格式
         logger.info("Convert to evaluation format...")
-        for in_jsonl, out_json, task_type in zip(
-            jsonl_files, final_json_files, task_types, strict=True
-        ):
-            Predictor.to_evahan_format(in_jsonl, out_json, task_type)
+        Predictor.to_evahan_format(jsonl_file, json_file)
 
-
-def run_trainset(
-    run_name: str, host: str = "127.0.0.1", port: int = 8000
-) -> None:
-    """对训练集进行预测，并保存结果到run_name指定的文件夹中。
-
-    Args:
-        run_name (str): 保存结果的文件夹名称
-        host (str): vllm服务的主机地址
-        port (int): vllm服务的端口号
-    """
-    # 初始化需要访问vllm服务的客户端
-    client = Client(host=host, port=port)
-    predictor = Predictor(client)
-
-    folders = [
-        config.EVAHAN_TRAINSET_A,
-        config.EVAHAN_TRAINSET_B,
-        config.EVAHAN_TRAINSET_C,
-    ]
-    task_types: list[Literal["ocr", "layout"]] = ["ocr", "layout", "ocr"]
-    predictor.run(
-        folders,
-        task_types,
-        f"train_{run_name}",
-        resume=True,
-    )
-
-
-def run_ocr_testset(
-    run_name: str, host: str = "127.0.0.1", port: int = 8000
-) -> None:
-    """对测试集进行预测，并保存结果到run_name指定的文件夹中。
-
-    Args:
-        run_name (str): 保存结果的文件夹名称
-        host (str): vllm服务的主机地址
-        port (int): vllm服务的端口号
-    """
-    # 初始化需要访问vllm服务的客户端
-    logger.info(f"Connect to Swift server at {host}:{port}")
-    client = Client(host=host, port=port)
-    predictor = Predictor(client)
-
-    test_folders = [
-        config.EVAHAN_TESTSET_PATH / "Task_A",
-        config.EVAHAN_TESTSET_PATH / "Task_C",
-    ]
-    task_types: list[Literal["ocr", "layout"]] = ["ocr", "ocr"]
-    predictor.run(
-        test_folders,
-        task_types,
-        run_name,
-        resume=True,
-    )
-
-    logger.info("All done!")
 
 
 def run_layout_testset(
@@ -272,13 +184,9 @@ def run_layout_testset(
     client = Client(host=host, port=port)
     predictor = Predictor(client)
 
-    test_folders = [
-        config.EVAHAN_TESTSET_PATH / "Task_B_argument"
-    ]
-    task_types: list[Literal["ocr", "layout"]] = ["layout"]
+    folder = config.EVAHAN_TESTSET_PATH / "Task_B_argument"
     predictor.run(
-        test_folders,
-        task_types,
+        folder,
         run_name,
         resume=True,
     )

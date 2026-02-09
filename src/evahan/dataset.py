@@ -5,37 +5,6 @@ from rich import print
 
 from evahan import config
 from evahan.core import EvahanLayoutItem, EvahanOcrItem, EvahanRegion
-from evahan.viz_layout import draw_layout
-
-
-def annotate_dataset_b(name: str = "Dataset_B") -> None:
-    """
-    为数据集B生成可视化版面图像，方便查看标注是否正确
-    Args:
-        name: 数据集名称，默认 Dataset_B, 也可以是 Dataset_B_argument
-    """
-
-    base_folder = config.EVAHAN_TRAINSET_PATH
-    json_file = base_folder / f"{name}.json"
-    image_folder = base_folder / name
-    save_folder = base_folder / f"{name}_annotated"
-
-    if save_folder.exists():
-        print(f"目录 {save_folder} 已存在，跳过可视化生成")
-        return
-
-    layout_items = load_evahan_layout_dataset(json_file)
-    layout_dict: dict[str, list[EvahanRegion]] = {
-        item.relative_image_path: item.regions for item in layout_items
-    }
-
-    draw_layout(
-        image_folder=image_folder,
-        save_folder=save_folder,
-        layout_dict=layout_dict,
-    )
-
-    print(f"可视化版面图像已保存到 {save_folder}")
 
 
 def load_evahan_ocr_dataset(dataset_path: Path) -> list[EvahanOcrItem]:
