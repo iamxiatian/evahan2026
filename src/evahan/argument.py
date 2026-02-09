@@ -242,5 +242,5 @@ if __name__ == "__main__":
     # print("OCR数据集增强完毕")
     # argument_dataset_b()
     # print("数据集B增强完毕")
-    # argument_task_b()
+    argument_task_b()
     print("任务B增强完毕")
