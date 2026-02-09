@@ -9,8 +9,8 @@ from rich import print
 
 from evahan.argument import argument_dataset_ac, argument_dataset_b
 from evahan.convert_swift import convert_to_swift, merge_ocr_jsonl
-from evahan.viz_layout import annotate_dataset_b
 from evahan.util.image_rotate import rotate_folder
+from evahan.viz_layout import annotate_dataset_b
 
 
 def __extract_zip(zip_file: str, extract_to: str):

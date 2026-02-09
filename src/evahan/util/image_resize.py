@@ -19,12 +19,16 @@ class ResizedImage(NamedTuple):
     y1: int  # 在背景图中的左上角y坐标
     proc_w: int  # 粘贴在背景图上的图片的宽度
     proc_h: int  # 粘贴在背景图上的图片的高度
+    raw_w: int  # 原始图像的宽度
+    raw_h: int  # 原始图像的高度
     scale: float  # 图片的缩放比例
     whole_image: MatLike  # 连同背景在一起的整个图片
 
 
 class ImageProcessor:
-    def __init__(self, bg_width: int = 924, bg_height: int = 1232, random_bg:bool=True):
+    def __init__(
+        self, bg_width: int = 924, bg_height: int = 1232, random_bg: bool = True
+    ):
         """
         初始化图片处理器
 
@@ -47,19 +51,17 @@ class ImageProcessor:
         """
         # 生成200-255之间的随机灰度值（从浅灰到白）
         random.seed(42)
-        if not self.random_bg:
-            gray_value = 242 # 如不指定随机，默认灰色背景
-        elif random.random() < 0.7:  # 70%的概率使用浅灰色背景
+        # 如不指定随机，默认灰色背景, 否则70%的概率使用浅灰色背景
+        if not self.random_bg or random.random() < 0.7:
             gray_value = 242
         else:  # 30%的概率随机使用浅灰背景
             gray_value = random.randint(200, 255)
 
-        background = np.full(
+        return np.full(
             (self.bg_height, self.bg_width, 3),
             (gray_value, gray_value, gray_value),
             dtype=np.uint8,
         )
-        return background
 
     def _resize_if_needed(
         self, image: MatLike, margin: int = 20
@@ -75,8 +77,6 @@ class ImageProcessor:
             (缩放后的图片, 缩放比例)
         """
         h, w = image.shape[:2]
-        scale = 1.0
-
         # 检查是否需要缩放
         if w > self.bg_width - margin or h > self.bg_height - margin:
             # 计算缩放比例，留出margin的边距
@@ -94,7 +94,7 @@ class ImageProcessor:
             )
             return resized_image, scale
 
-        return image, scale
+        return image, 1.0
 
     def _calculate_max_offset(
         self, img_width: int, img_height: int
@@ -129,6 +129,7 @@ class ImageProcessor:
         """
         # 读取图片
         image = cv2.imread(image_path)
+        raw_h, raw_w = image.shape[:2]
 
         # 转换颜色空间（OpenCV默认BGR转RGB）
         image_rgb: MatLike = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
@@ -154,8 +155,8 @@ class ImageProcessor:
                 x_offset, y_offset = 0, 0
 
         # 如果期望随机偏移，但偏移量为0，则表示失败
-        if random_offset and x_offset == 0 and y_offset == 0:
-            pass  # 忽略
+        # if random_offset and x_offset == 0 and y_offset == 0:
+        #    return  # 忽略
 
         # 将图片粘贴到背景上
         result_image = background.copy()
@@ -171,6 +172,8 @@ class ImageProcessor:
             y1=y_offset,
             proc_w=proc_w,
             proc_h=proc_h,
+            raw_w=raw_w,
+            raw_h=raw_h,
             scale=scale,
             whole_image=result_bgr,
         )

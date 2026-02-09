@@ -15,9 +15,11 @@ from rich.progress import track
 
 from evahan import config
 from evahan.core import EvahanRegion
+from evahan.dataset import load_evahan_layout_dataset
+from evahan.extract import extract_layout_regions
 from evahan.util import file_util
 from evahan.util.annotate import visualize_layout
-from evahan.dataset import load_evahan_layout_dataset
+
 
 def draw_layout(
     image_folder: Path,
@@ -28,7 +30,7 @@ def draw_layout(
     Args:
         image_folder (Path): 包含图像文件的文件夹路径。
         save_folder (Path): 可视化结果保存的文件夹路径。
-        layout_dict (dict[str, list[EvahanRegion]]): 图像路径到布局区域列表的映射，其中可以的形式为"Dataset_A/a_0001.jpg"。
+        layout_dict (dict[str, list[EvahanRegion]]): 图像文件名称（不含路径）到布局区域列表的映射，其中可以的形式为"Dataset_A/a_0001.jpg"。
     """
     if not image_folder.exists():
         print(f"[red]待处理的图片文件夹不存在：{image_folder}[/red]")
@@ -53,6 +55,37 @@ def draw_layout(
         )
 
 
+def annotate_argument_testset(
+    run_name: str,
+) -> None:
+    """把某一次测试集运行结果的版面布局可视化出来。基于VLLM的原始输出，直接在转换后的图像上执行结果。
+    Args:
+        run_name (str): 对测试集的一次运行结果的名称。
+    """
+    base_folder = config.EVAHAN_RUNTEST_PATH / run_name
+
+    # 记录图片名称与区域的映射关系
+    regions_dict: dict[str, list[EvahanRegion]] = {}
+    jsonl_file = base_folder / "Task_B_argument.jsonl"
+    # 记录文件名称（不含路径）到元素区域的映射
+    regions_dict: dict[str, list[EvahanRegion]] = {}
+    with jsonl_file.open("r", encoding="utf-8") as f:
+        for line in f:
+            item = json.loads(line)
+            image_name = Path(item["image_path"]).name
+            llm_response = item["llm_response"]
+            regions = extract_layout_regions(llm_response)
+            regions_dict[image_name] = regions
+
+    image_folder = config.EVAHAN_TESTSET_PATH / "Task_B_argument"
+    save_folder = base_folder / "Task_B_argument_annotated"
+    draw_layout(
+        image_folder=image_folder,
+        save_folder=save_folder,
+        layout_dict=regions_dict,
+    )
+
+
 def draw_testset_results(
     run_name: str,
 ) -> None:
@@ -62,15 +95,15 @@ def draw_testset_results(
     """
     base_folder = config.EVAHAN_RUNTEST_PATH / run_name
     json_file = base_folder / "Task_B.json"
-    
+
     # 记录图片名称与区域的映射关系
     regions_dict: dict[str, list[EvahanRegion]] = {}
-    
+
     items = load_evahan_layout_dataset(json_file)
     for item in track(items, description="annotate layout"):
         for item in items:
-            image_path = item.image_path.name
-            regions_dict[image_path] = item.regions
+            image_name = item.image_path.name
+            regions_dict[image_name] = item.regions
 
     image_folder = config.EVAHAN_TESTSET_PATH / "Task_B"
     save_folder = base_folder / "Task_B_annotated"
@@ -99,7 +132,7 @@ def annotate_dataset_b(name: str = "Dataset_B") -> None:
 
     layout_items = load_evahan_layout_dataset(json_file)
     layout_dict: dict[str, list[EvahanRegion]] = {
-        item.relative_image_path: item.regions for item in layout_items
+        item.image_path.name: item.regions for item in layout_items
     }
 
     draw_layout(
@@ -109,7 +142,6 @@ def annotate_dataset_b(name: str = "Dataset_B") -> None:
     )
 
     print(f"可视化版面图像已保存到 {save_folder}")
-
 
 
 if __name__ == "__main__":

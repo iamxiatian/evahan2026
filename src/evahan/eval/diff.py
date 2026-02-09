@@ -77,7 +77,7 @@ def compare_ocr_items(
 
 if __name__ == "__main__":
     compare_ocr_items(
-        run_name1="v0_qwen25vl7bunsft",
-        run_name2="va_lora_a800_16000",
-        out_json_file=config.EVAHAN_RUNTEST_PATH / "diff_v0_va.json",
+        run_name1="v1_lora_a800_05850",
+        run_name2="vz_liuyulongsftresult",
+        out_json_file=config.EVAHAN_RUNTEST_PATH / "diff_v1_vz.json",
     )

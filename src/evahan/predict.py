@@ -83,7 +83,7 @@ class Predictor:
                     continue
 
                 response = self.client.query(image_path.as_posix(), llm_query)
-                
+
                 f.write(
                     json.dumps(
                         {
@@ -124,9 +124,12 @@ class Predictor:
                 json.dump(ocr_items, f_out, ensure_ascii=False, indent=2)
             elif task == "layout":
                 # 转换为Layout评测格式
-                scale_factors: dict[str, float] = {} # 读取缩放因子
-                with open(config.EVAHAN_TESTSET_PATH / "Task_B_argument_scale.json", "r", encoding="utf-8") as f:
-                    items = cast(list[dict[str, str|float]], json.load(f))
+                scale_factors: dict[str, float] = {}  # 读取缩放因子
+                with open(
+                    config.EVAHAN_TESTSET_PATH / "Task_B_argument_scale.json",
+                    encoding="utf-8",
+                ) as f:
+                    items = cast(list[dict[str, str | float]], json.load(f))
                     for item in items:
                         image_path = str(item["image_path"])
                         scale_factors[image_path] = float(item["scale_factor"])
@@ -146,7 +149,7 @@ class Predictor:
 
                     # 转换为最终的测试集路径
                     layout_item: LAYOUT_ITEM_TYPE = {
-                        "image_path":  f"Task_B/{image_name}",
+                        "image_path": f"Task_B/{image_name}",
                         "regions": regions,
                     }
                     layout_items.append(layout_item)
@@ -272,9 +275,7 @@ def run_layout_testset(
     client = Client(host=host, port=port)
     predictor = Predictor(client)
 
-    test_folders = [
-        config.EVAHAN_TESTSET_PATH / "Task_B_argument"
-    ]
+    test_folders = [config.EVAHAN_TESTSET_PATH / "Task_B_argument"]
     task_types: list[Literal["ocr", "layout"]] = ["layout"]
     predictor.run(
         test_folders,
@@ -288,7 +289,6 @@ def run_layout_testset(
     draw_testset_results(run_name)
 
     logger.info("All done!")
-
 
 
 if __name__ == "__main__":

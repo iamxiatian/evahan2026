@@ -17,10 +17,10 @@ from evahan.core import EvahanLayoutItem, EvahanOcrItem, EvahanRegion
 from evahan.dataset import (
     load_evahan_layout_dataset,
     load_evahan_ocr_dataset,
-    annotate_dataset_b,
 )
 from evahan.util import file_util, image_util
 from evahan.util.image_resize import ImageProcessor, ResizedImage
+from evahan.viz_layout import annotate_dataset_b
 
 
 def __argument_ocr_dataset(
@@ -200,13 +200,17 @@ def argument_task_b() -> None:
     增强测试集B中的图片，生成新的图片和布局信息，测试时使用新数据，而不再使用原来的测试集B
     """
     # 数据集B的增强版本的名称，目录和元数据文件的名称都采用这个名字
-    scale_factors:list[dict[str,str|float]] = [] # 缩放因子列表，每个元素是一个字典，包含缩放因子的文件名称和对应的值
+    scale_factors: list[
+        dict[str, str | float]
+    ] = []  # 缩放因子列表，每个元素是一个字典，包含缩放因子的文件名称和对应的值
     argument_name = "Task_B_argument"
     processor = ImageProcessor(bg_width=924, bg_height=1232, random_bg=False)
     out_dir = config.EVAHAN_TESTSET_PATH / argument_name
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    raw_images = file_util.list_image_files(config.EVAHAN_TESTSET_PATH / "Task_B")
+    raw_images = file_util.list_image_files(
+        config.EVAHAN_TESTSET_PATH / "Task_B"
+    )
     for raw_image in track(raw_images, description="增强测试集B..."):
         resized_info = processor.process_image(
             raw_image.as_posix(), random_offset=False
@@ -214,8 +218,10 @@ def argument_task_b() -> None:
         out_file = out_dir / raw_image.name
         scale_factors.append(
             {
-                "image_path": raw_image.name,
+                "image_name": raw_image.name,
                 "scale_factor": resized_info.scale,
+                "proc_h": resized_info.proc_h,
+                "proc_w": resized_info.proc_w,
             }
         )
         cv2.imwrite(out_file.as_posix(), resized_info.whole_image)
@@ -231,11 +237,10 @@ def argument_task_b() -> None:
         )
 
 
-
 if __name__ == "__main__":
     # argument_dataset_ac()
     # print("OCR数据集增强完毕")
-    #argument_dataset_b()
+    # argument_dataset_b()
     # print("数据集B增强完毕")
-    argument_task_b()
+    # argument_task_b()
     print("任务B增强完毕")
