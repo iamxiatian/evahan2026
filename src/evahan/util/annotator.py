@@ -2,7 +2,7 @@ from pathlib import Path
 
 from PIL import Image, ImageDraw
 
-from evahan.dataset import EvahanRegion
+# from evahan.dataset import EvahanRegion
 
 
 color_map: dict[str, tuple[int, int, int]] = {
@@ -102,7 +102,7 @@ def __annot_region(
 
 
 def annotate(
-    image_file: str | Path, regions: list[EvahanRegion]
+    image_file: str | Path, regions
 ) -> Image.Image:
     """
     针对图像文件和区域列表进行标注
@@ -126,7 +126,7 @@ def annotate(
 
 
 def annotate_bbox(
-    image_file: str | Path, regions: list[EvahanRegion]
+    image: Image.Image, regions
 ) -> Image.Image:
     """
     针对图像文件和区域列表进行标注
@@ -136,9 +136,11 @@ def annotate_bbox(
     Returns:
         标注后的PIL图像对象
     """
-    image: Image.Image = Image.open(image_file).convert("RGB")
+    # image: Image.Image = Image.open(image_file).convert("RGB")
     for region in regions:
         # bbox format: [x1, y1, x2, y2]
+        if not len(region.bbox) == 4:
+            continue
         p1 = (region.bbox[0], region.bbox[1]) # left top
         p2 = (region.bbox[2], region.bbox[1]) # right top
         p3 = (region.bbox[2], region.bbox[3]) # right bottom

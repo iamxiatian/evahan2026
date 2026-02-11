@@ -17,6 +17,7 @@ model_path = config.QWEN_VL_7B_INSTRUCT
 tokenizer = AutoTokenizer.from_pretrained(model_path)
 
 text = "汧第卅五"
+text = "刻孫德彧道行碑存　文錄後元統三年"
 # encode
 tokens = tokenizer.encode(text)
 print(tokens)

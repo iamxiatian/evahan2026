@@ -1,0 +1,9 @@
+imgaug==0.4.0
+lmdb
+numpy==1.26.2
+opencv-python==4.6.0.66
+opencv-python-headless==4.6.0.66
+pyclipper
+pyyaml
+rapidfuzz
+tqdm

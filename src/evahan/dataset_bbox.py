@@ -127,18 +127,17 @@ def __convert_ocr_item(item: EvahanOcrItem, root_dir: Path) -> dict:
     """将单个EvahanOcrItem转换为Swift LLM推理所需的格式。"""
     messages = [
         {
-            "role": "user",
-            "content": f"<image>{config.OCR_USER_QUERY}",
+            "from": "human",
+            "value": f"<image>\n{config.OCR_USER_QUERY}",
         },
         {
-            "role": "assistant",
-            "content": item.text,
+            "from": "gpt",
+            "value": f"{item.text}",
         },
     ]
-    images = [str(root_dir / item.image_path)]
     return {
-        "messages": messages,
-        "images": images,
+        "conversations": messages,
+        "image": str(item.image_path),
     }
 
 
@@ -146,7 +145,8 @@ def __convert_layout_item(item: EvahanLayoutItem, root_dir: Path) -> dict:
     """将单个EvahanLayoutItem转换为Swift LLM推理所需的格式。"""
     ## rescale the bbox to the size of the image according to the scale factor 28
     image_path = item.image_path
-    image = Image.open(config.EVAHAN_TRAIN_PATH_B.parent / image_path)
+    image_absolute_path = config.EVAHAN_TRAIN_PATH_B.parent / image_path
+    image = Image.open(image_absolute_path)
     width, height = image.size
     new_width, new_height = smart_resize(width, height, max_pixels=config.max_pixels, factor=28)
     scale_factor_w = new_width / width
@@ -156,22 +156,27 @@ def __convert_layout_item(item: EvahanLayoutItem, root_dir: Path) -> dict:
         bbox = region.bbox
         bbox = [bbox[0] * scale_factor_w, bbox[1] * scale_factor_h, bbox[2] * scale_factor_w, bbox[3] * scale_factor_h]
         bbox = [int(bbox[0]), int(bbox[1]), int(bbox[2]), int(bbox[3])]
-        response_text += f"""<div class="{region.label}" data-bbox="{bbox}">{region.text}</div>\n"""
+
+        label = region.label
+        if label == "text":
+            text = region.text
+        else:
+            text = ""
+        response_text += f"""<div class="{label}" data-bbox="{bbox[0]} {bbox[1]} {bbox[2]} {bbox[3]}">{text}</div>\n"""
 
     messages = [
         {
-            "role": "user",
-            "content": f"<image>{config.LAYOUT_USER_QUERY}",
+            "from": "human",
+            "value": f"<image>\n{config.LAYOUT_USER_QUERY}",
         },
         {
-            "role": "assistant",
-            "content": response_text.strip(),
+            "from": "gpt",
+            "value": f"{response_text.strip()}",
         },
     ]
-    images = [str(root_dir / item.image_path)]
     return {
-        "messages": messages,
-        "images": images,
+        "conversations": messages,
+        "image": str(image_absolute_path),
     }
 
 
@@ -197,13 +202,13 @@ def convert_to_swift():
     """
 
     base_folder = config.EVAHAN_TRAIN_PATH_A.parent # 原始训练集所在的父目录
-    print("Convert Dataset_A to Swift format...")
-    items = load_evahan_ocr_dataset(base_folder / "Dataset_A.json")
-    items = [__convert_ocr_item(item, base_folder) for item in items]
-    with (base_folder / "Swift_A.json").open("w", encoding="utf-8") as f:
-        json.dump(items, f, ensure_ascii=False, indent=2)
-    with jsonlines.open(base_folder / "Swift_A.jsonl", mode="w") as writer:
-        writer.write_all(items)
+    # print("Convert Dataset_A to Swift format...")
+    # items = load_evahan_ocr_dataset(base_folder / "Dataset_A.json")
+    # items = [__convert_ocr_item(item, base_folder) for item in items]
+    # with (base_folder / "Swift_A.json").open("w", encoding="utf-8") as f:
+    #     json.dump(items, f, ensure_ascii=False, indent=2)
+    # with jsonlines.open(base_folder / "Swift_A.jsonl", mode="w") as writer:
+    #     writer.write_all(items)
 
     print("Convert Dataset_B to Swift format...")
     items = load_evahan_layout_dataset(base_folder / "Dataset_B.json")
@@ -212,14 +217,14 @@ def convert_to_swift():
         json.dump(items, f, ensure_ascii=False, indent=2)
     with jsonlines.open(base_folder / "Swift_B.jsonl", mode="w") as writer:
         writer.write_all(items)
-        
-    print("Convert Dataset_C to Swift format...")
-    items = load_evahan_ocr_dataset(base_folder / "Dataset_C.json")
-    items = [__convert_ocr_item(item, base_folder) for item in items]
-    with (base_folder / "Swift_C.json").open("w", encoding="utf-8") as f:
-        json.dump(items, f, ensure_ascii=False, indent=2)
-    with jsonlines.open(base_folder / "Swift_C.jsonl", mode="w") as writer:
-        writer.write_all(items)
+ 
+    # print("Convert Dataset_C to Swift format...")
+    # items = load_evahan_ocr_dataset(base_folder / "Dataset_C.json")
+    # items = [__convert_ocr_item(item, base_folder) for item in items]
+    # with (base_folder / "Swift_C.json").open("w", encoding="utf-8") as f:
+    #     json.dump(items, f, ensure_ascii=False, indent=2)
+    # with jsonlines.open(base_folder / "Swift_C.jsonl", mode="w") as writer:
+    #     writer.write_all(items)
 
     print("All Done!")
 

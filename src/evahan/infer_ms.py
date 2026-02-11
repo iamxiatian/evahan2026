@@ -66,7 +66,7 @@ def main(image_path: str, prompt: str):
     inputs = inputs.to("cuda")
 
     # Inference: Generation of the output
-    generated_ids = model.generate(**inputs, max_new_tokens=2048)
+    generated_ids = model.generate(**inputs, max_new_tokens=8192)
     generated_ids_trimmed = [
         out_ids[len(in_ids) :]
         for in_ids, out_ids in zip(inputs.input_ids, generated_ids, strict=True)
@@ -80,7 +80,8 @@ def main(image_path: str, prompt: str):
 
 
 if __name__ == "__main__":
-    # test_image_path = config.EVAHAN_TRAIN_PATH_A / "a_0015.jpg"
-    # main(str(test_image_path))
+    test_image_path = config.EVAHAN_TRAIN_PATH_A / "a_0015.jpg"
+    main(str(test_image_path), prompt=config.OCR_USER_QUERY)
+
     test_image_path = config.EVAHAN_TRAIN_PATH_B / "b_0001.jpg"
     main(str(test_image_path), prompt=config.LAYOUT_USER_QUERY)

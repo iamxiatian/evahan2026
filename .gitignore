@@ -7,9 +7,10 @@ __pycache__/
 *.py[codz]
 *$py.class
 **.DS_Store
-
+layout_annotated_images/
 # C extensions
 *.so
+local
 
 # Distribution / packaging
 .Python
