@@ -70,7 +70,7 @@ def __argument_ocr_dataset(
             )
         )
 
-    # 保存合并后的数据集D到JSON文件，符合Evahan2026的OCR数据集格式
+    # 保存合并后的数据集到JSON文件，符合Evahan2026的OCR数据集格式
     with (config.EVAHAN_TRAINSET_PATH / f"Dataset_{dataset_name}.json").open(
         "w"
     ) as f:
