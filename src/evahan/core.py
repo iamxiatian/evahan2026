@@ -19,7 +19,7 @@ class EvahanOcrItem(NamedTuple):
         }
 
 
-# 地域类型转换为标准Python字典时的类型定义
+# 区域类型转换为标准Python字典时的类型定义
 REGION_DICT_TYPE = dict[str, str | list[tuple[int, int]]]
 
 

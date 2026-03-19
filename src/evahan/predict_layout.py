@@ -10,7 +10,7 @@
 
 import json
 from pathlib import Path
-from typing import cast, Optional
+from typing import cast
 
 import structlog
 from rich.progress import track
@@ -27,7 +27,7 @@ logger = structlog.get_logger(__name__)
 LAYOUT_ITEM_TYPE = dict[str, str | list[REGION_DICT_TYPE]]
 
 
-def _valid_region(r:EvahanRegion, proc_w:int, proc_h:int) -> Optional[EvahanRegion]:
+def _valid_region(r:EvahanRegion, proc_w:int, proc_h:int) -> EvahanRegion | None:
     x1, y1 = r.points[0]
     x2, y2 = r.points[1]
     x3, y3 = r.points[2]
@@ -43,11 +43,11 @@ def _valid_region(r:EvahanRegion, proc_w:int, proc_h:int) -> Optional[EvahanRegi
     y4 = min(y4, proc_h)
     if x2==x1 or y2==y3:
         return None
-    
+
     points:list[tuple[int, int]] = [(x1, y1), (x2, y2), (x3, y3), (x4, y4)]
     return EvahanRegion(r.label, r.text, points=points)
-        
-        
+
+
 
 
 class Predictor:
