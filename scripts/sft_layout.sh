@@ -1,7 +1,7 @@
 SWIFT_PATCH_CONV3D=1 \
 OMP_NUM_THREADS=1 \
 NPROC_PER_NODE=8 \
-MAX_PIXELS=1003520 \
+MAX_PIXELS=1200000 \
 CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 \
 swift sft \
     --model /mnt/public/xiatian/workspace/models/Qwen2.5-VL-7B-Instruct \
@@ -10,7 +10,7 @@ swift sft \
     --torch_dtype bfloat16 \
     --attn_impl flash_attn \
     --ddp_backend nccl\
-    --num_train_epochs 8 \
+    --num_train_epochs 15 \
     --per_device_train_batch_size 2 \
     --learning_rate 2e-5 \
     --lora_rank 8 \
@@ -24,7 +24,7 @@ swift sft \
     --save_steps 50 \
     --logging_steps 5 \
     --max_length 8192 \
-    --output_dir output_layout_v3 \
+    --output_dir output_layout_v5 \
     --system 'You are a helpful assistant.' \
     --warmup_ratio 0.05 \
     --dataloader_num_workers 4 \

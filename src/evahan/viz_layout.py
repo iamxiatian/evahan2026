@@ -148,9 +148,3 @@ if __name__ == "__main__":
     import typer
 
     typer.run(draw_testset_results)
-    # with open("run_results/layout_lyl/Task_B.json", "r", encoding="utf-8") as f:
-    #     items:list[dict[str, any]] = json.load(f)
-    #     items = sorted(items, key=lambda x: x["image_path"])
-
-    # with open("run_results/layout_lyl/Task_B_2.json", "w", encoding="utf-8") as f:
-    #     json.dump(items, f, ensure_ascii=False, indent=2)
